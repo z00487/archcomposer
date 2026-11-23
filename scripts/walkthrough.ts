@@ -1,7 +1,7 @@
 /**
- * README「快速开始」五步走查（`npm run walkthrough`）
+ * README「路径 B」五步走查（`npm run walkthrough`）
  *
- * **这个脚本的存在理由**：README 里写了一条五步的操作路径。文档里的路径最容易
+ * **这个脚本的存在理由**：README 的「路径 B」里写了一条五步的操作路径。文档里的路径最容易
  * 悄悄过期——界面上的按钮改了名字、命令层的函数改了签名，README 却还写着老样子，
  * 而且**没有任何测试会失败**（因为没有东西在检查 README）。
  *
@@ -88,7 +88,7 @@ function check(label: string, ok: boolean, detail = ''): void {
 
 const START = 'demohall@1/column_e__01';
 console.log(`\n模型：${geo.prefix}，${components.length} 个构件\n`);
-console.log('README「快速开始」五步走查：\n');
+console.log('README「路径 B」五步走查：\n');
 
 // ① 选构件
 stores.selection.set((s) => ({ ...s, selectedId: START }));

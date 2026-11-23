@@ -47,6 +47,10 @@
 .step-duration-row{display:flex;align-items:center;gap:8px;font-size:10px;color:#8795a2}
 .step-duration{width:88px;border:1px solid #e4eaef;border-radius:6px;padding:4px 7px;font:inherit;font-size:11px;color:#3b5064;background:#fff}
 .step-intent-select{width:100%;border:1px solid #e4eaef;border-radius:7px;padding:6px 8px;font:inherit;font-size:11px;color:#3b5064;background:#fff}
+.step-motion-row{display:flex;align-items:center;gap:8px;font-size:10px;color:#8795a2}
+.step-motion-row label{flex:0 0 auto}
+.step-motion-select{flex:1 1 auto;border:1px solid #e4eaef;border-radius:7px;padding:6px 8px;font:inherit;font-size:11px;color:#3b5064;background:#fff}
+.step-motion-select:focus{outline:none;border-color:#9ec2e8;box-shadow:0 0 0 2px rgba(120,170,225,.18)}
 .step-actions{display:flex;flex-wrap:wrap;gap:6px}
 .step-action{border:1px solid #dce4ea;background:#fff;border-radius:7px;padding:6px 9px;font:inherit;font-size:10px;font-weight:600;color:#506273;cursor:pointer}
 .step-action:hover{background:#f5f8fa}
@@ -173,3 +177,111 @@
   outline: 2px solid var(--accent, #3f6f9f);
   outline-offset: -1px;
 }
+
+/* ── 生成 / 语言编创 / 大模型设置（PPT 第 3 页「01 生成 · 03 编辑」）──
+ *
+ * 这一组样式刻意**沿用既有的视觉语汇**（粉色主按钮、灰底卡片、绿标签），
+ * 而不是引入一套新的配色——新面板看起来像「另一个应用」是很常见的失败：
+ * 作者会以为它和分镜不是一回事，而它恰恰是分镜的上游。
+ */
+
+.studio-root { display: flex; flex-direction: column; }
+.studio-section .section-title { margin-bottom: 11px; }
+
+.studio-input,
+.studio-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #e0e7ed;
+  border-radius: 7px;
+  padding: 7px 9px;
+  margin-bottom: 8px;
+  font: inherit;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #3b5064;
+  background: #fbfcfd;
+}
+
+.studio-textarea { resize: vertical; min-height: 52px; }
+.studio-input:focus,
+.studio-textarea:focus { outline: none; border-color: #c9a37a; background: #fff; }
+
+.studio-row { display: flex; gap: 10px; align-items: center; }
+.studio-inline { display: flex; align-items: center; gap: 5px; font-size: 10px; color: #7b8b98; }
+.studio-inline input[type="number"] { margin-bottom: 0; }
+.studio-minutes {
+  width: 52px;
+  box-sizing: border-box;
+  border: 1px solid #e0e7ed;
+  border-radius: 6px;
+  padding: 5px 6px;
+  font: inherit;
+  font-size: 11px;
+  color: #3b5064;
+  background: #fbfcfd;
+}
+.studio-toggle { cursor: pointer; user-select: none; }
+.studio-divider { height: 1px; background: #edf0f3; margin: 16px 0; }
+
+.studio-field { display: flex; align-items: center; gap: 8px; }
+.studio-field > span { flex: 0 0 62px; font-size: 10px; color: #7b8b98; }
+.studio-field .studio-input { margin-bottom: 6px; }
+.field-hint { margin: 0 0 10px; line-height: 1.6; }
+
+/* 草稿卡：一眼看清「生成了什么」——步数、意图、时长、运镜 */
+.gen-draft:empty { display: none; }
+.draft-box { margin-top: 12px; border: 1px solid #e3eaf0; border-radius: 10px; background: #fbfcfd; padding: 11px; }
+.draft-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 9px; }
+.draft-title { font-size: 12px; color: #2f4a5f; overflow-wrap: anywhere; }
+.draft-source { flex: 0 0 auto; font-size: 9px; color: #2a9b73; background: #e7f7f0; padding: 3px 6px; border-radius: 5px; }
+.draft-steps { margin: 0; padding-left: 17px; display: flex; flex-direction: column; gap: 5px; }
+.draft-step { font-size: 10px; color: #4a5f71; display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
+.draft-step-title { font-weight: 600; }
+.draft-step-intent,
+.draft-step-dur,
+.draft-step-motion { font-size: 9px; color: #8795a2; background: #eef3f7; border-radius: 4px; padding: 2px 5px; }
+.draft-step-motion:empty { display: none; }
+.draft-notes,
+.draft-warnings { margin: 9px 0 0; padding-left: 17px; font-size: 9px; line-height: 1.7; color: #8795a2; }
+.draft-warnings { color: #a8453a; }
+.draft-actions { display: flex; gap: 8px; margin-top: 11px; }
+.draft-actions .apply-button { width: auto; flex: 1; margin-top: 0; padding: 8px 11px; }
+.quiet-button.is-inline { width: auto; }
+
+.studio-error { margin-top: 11px; border: 1px solid #f0c8c4; background: #fceceb; color: #a8453a; border-radius: 8px; padding: 9px 10px; font-size: 10px; line-height: 1.6; }
+.studio-empty { display: none; }
+
+/* 解析 / 归因结果：**把「系统理解成了什么」摊开**，是这套交互的核心界面 */
+.parse-box { margin-top: 11px; border: 1px solid #e3eaf0; border-radius: 10px; background: #fbfcfd; padding: 11px; }
+.parse-box.parse-empty { background: #fdfaf6; border-color: #f0e2d2; }
+.parse-list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 9px; }
+.parse-item { display: flex; flex-direction: column; gap: 4px; border-left: 2px solid #e5a869; padding-left: 8px; }
+.parse-line { display: flex; align-items: center; gap: 7px; }
+.parse-kind { font-size: 11px; font-weight: 600; color: #8c4a18; }
+.parse-conf { font-size: 9px; border-radius: 4px; padding: 2px 5px; }
+.parse-conf-high { color: #2a9b73; background: #e7f7f0; }
+.parse-conf-low { color: #a97a1c; background: #fdf3e0; }
+.parse-why { font-size: 9px; line-height: 1.6; color: #8795a2; }
+.parse-unparsed { margin: 9px 0 0; line-height: 1.6; }
+
+.diag-box { border-left: 2px solid #7aa8d0; padding-left: 8px; margin-bottom: 11px; }
+.diag-box:last-child { margin-bottom: 0; }
+.diag-head { display: flex; align-items: center; gap: 7px; }
+.diag-aspect { font-size: 11px; font-weight: 600; color: #2f5c80; }
+.diag-why { margin: 5px 0 3px; font-size: 10px; line-height: 1.6; color: #4a5f71; }
+.diag-reason { margin: 0 0 8px; line-height: 1.6; }
+.diag-none { margin: 0; line-height: 1.65; }
+.diag-actions .apply-button { width: auto; margin-top: 0; padding: 7px 12px; }
+
+.outcome-list { margin: 11px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 5px; }
+.outcome-item { display: flex; gap: 6px; font-size: 10px; line-height: 1.6; border-radius: 6px; padding: 6px 8px; }
+.outcome-ok { color: #2a7a5c; background: #eefaf4; }
+.outcome-fail { color: #a8453a; background: #fceceb; }
+.outcome-mark { flex: 0 0 auto; font-weight: 700; }
+
+.set-status:empty { display: none; }
+.set-note { margin: 10px 0 0; font-size: 10px; line-height: 1.6; border-radius: 7px; padding: 8px 9px; }
+.set-note-idle { color: #7b8b98; background: #f4f7fa; }
+.set-note-ok { color: #2a7a5c; background: #eefaf4; }
+.set-note-warn { color: #a97a1c; background: #fdf3e0; }

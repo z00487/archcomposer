@@ -30,6 +30,11 @@ import { describeTarget, targetIds } from '../../domain/types/solver.ts';
 import type { VisualIntent, IntentPrediction } from '../../domain/types/intent.ts';
 import { INTENT_LABELS, defaultPredicatesFor } from '../../domain/types/intent.ts';
 import type { Pose } from '../../domain/types/geometry.ts';
+import type { CameraMotion } from '../../domain/types/motion.ts';
+import { describeMotion, orbitMotion } from '../../domain/types/motion.ts';
+import { EditCommandKind } from '../../domain/language/instructions.ts';
+import type { EditCommand } from '../../domain/language/instructions.ts';
+import type { FeedbackDiagnosis } from '../../domain/language/feedback.ts';
 import { makeId } from '../../core/id.ts';
 import {
   addStep,
@@ -157,6 +162,31 @@ export function updateStepText(
 
 export function setActiveStep(ctx: CommandContext, stepId: string | null): void {
   ctx.stores.storyboard.set((s) => ({ ...s, activeStepId: stepId }));
+}
+
+// ── 运镜（开题报告 §3.5、PPT 第 9 页的「全景环绕 · 360°」）────
+
+/**
+ * 设置或清除某一步的运镜。
+ *
+ * **为什么它不改 `solve`**：运镜是叠加在 `camera` 之上的相对运动，不改变
+ * 「这一步的目标与意图是否已被满足」这个判断。因此设了运镜不需要重解，
+ * `solve` 状态原封不动——如果把它标成 stale，用户会看到「待重算」却怎么
+ * 重算都还是 stale（因为求解器不管运镜），那是误导。
+ */
+export function setStepMotion(ctx: CommandContext, stepId: string, motion: CameraMotion | null): void {
+  const sb = currentStoryboard(ctx);
+  const step = findStep(sb, stepId);
+  if (!step) return;
+
+  if (motion && !step.camera) {
+    ctx.toast('这一步还没有机位，请先求解或预览一次，再设置运镜');
+    return;
+  }
+
+  const next = updateStep(sb, stepId, (s) => ({ ...s, motion }));
+  ctx.stores.storyboard.set((state) => ({ ...state, storyboard: next }));
+  ctx.toast(motion ? `已设置运镜：${describeMotion(motion)}` : '已清除这一步的运镜');
 }
 
 // ── 求解 ───────────────────────────────────────────────────────
@@ -544,4 +574,398 @@ export function stampModelRef(ctx: CommandContext): void {
 /** 目标的中文描述（UI 用）。 */
 export function targetLabel(ctx: CommandContext, target: TargetRef): string {
   return describeTarget(target, (id) => ctx.labelOf(id));
+}
+
+// ── ★ 自然语言指令的执行（开题报告 §3.3「说一句就能改」）─────────
+
+/** 一条指令的执行结果，供界面逐条回显。 */
+export interface InstructionOutcome {
+  command: EditCommand;
+  ok: boolean;
+  /** 界面上给作者看的说明（成功说明做了什么，失败说明为什么没做） */
+  message: string;
+}
+
+/**
+ * 执行一组由 `parseEditInstruction` 解析出来的指令。
+ *
+ * **一条纪律：这里是「语言 → 数据」的唯一落点。** 解析器（L3）只产出数据结构，
+ * 不碰 Store；本函数逐条翻译成既有的命令（`moveStepIn`、`setManualIntent`、
+ * `redirectStep`…），因此语言通道与手工操作走的是**完全同一条写入路径**——
+ * 「改目标必标 stale」「失败不写劣质结果」这些不变量自动成立，不需要在语言通道
+ * 里再实现一遍。
+ *
+ * **失败不中断**：一条指令做不成（如「第 9 步」越界）就记下原因继续下一条，
+ * 最后把逐条结果交给界面。作者一次说三件事、其中一件没听懂，不应该丢掉另外两件。
+ */
+export function applyInstructions(
+  ctx: CommandContext,
+  commands: EditCommand[],
+  context: { activeStepId: string | null },
+): InstructionOutcome[] {
+  const outcomes: InstructionOutcome[] = [];
+
+  for (const command of commands) {
+    outcomes.push(applyOne(ctx, command, context));
+  }
+
+  const done = outcomes.filter((o) => o.ok).length;
+  if (outcomes.length > 0) {
+    ctx.toast(
+      done === outcomes.length
+        ? `已执行 ${done} 条指令`
+        : `已执行 ${done} / ${outcomes.length} 条指令，其余未执行（见列表）`,
+    );
+  }
+  return outcomes;
+}
+
+function applyOne(
+  ctx: CommandContext,
+  command: EditCommand,
+  context: { activeStepId: string | null },
+): InstructionOutcome {
+  const sb = currentStoryboard(ctx);
+  const resolveIndex = (): number | null => {
+    if (command.stepIndex !== null) {
+      const index = command.stepIndex - 1;
+      return index >= 0 && index < sb.steps.length ? index : null;
+    }
+    if (!context.activeStepId) return null;
+    const index = sb.steps.findIndex((s) => s.id === context.activeStepId);
+    return index >= 0 ? index : null;
+  };
+
+  const stepIndex = resolveIndex();
+  const step = stepIndex !== null ? sb.steps[stepIndex] : null;
+
+  switch (command.kind) {
+    case EditCommandKind.MoveStep: {
+      const source = (command.payload?.sourceStepIndex as number | null) ?? null;
+      const from = source !== null ? source - 1 : stepIndex;
+      if (from === null) {
+        return { command, ok: false, message: '没指明要挪动哪一步' };
+      }
+      if (command.stepIndex === null) {
+        return { command, ok: false, message: '没指明要挪到第几步' };
+      }
+      const to = command.stepIndex - 1;
+      // `moveStep` 的 `to` 是**移动后**的下标，因此往后挪时需要减 1——
+      // 否则「把第 2 步放到第 4 步」会落到第 5 位（典型的差一错误）
+      const adjusted = to > from ? to - 1 : to;
+      moveStep(ctx, from, adjusted);
+      return { command, ok: true, message: `已把第 ${from + 1} 步移到第 ${to + 1} 位` };
+    }
+
+    case EditCommandKind.DeleteStep: {
+      if (!step) return { command, ok: false, message: '找不到要删除的步骤' };
+      deleteStep(ctx, step.id);
+      return { command, ok: true, message: `已删除第 ${stepIndex! + 1} 步「${step.title}」` };
+    }
+
+    case EditCommandKind.DuplicateStep: {
+      if (!step) return { command, ok: false, message: '找不到要复制的步骤' };
+      duplicateStep(ctx, step.id);
+      return { command, ok: true, message: `已复制第 ${stepIndex! + 1} 步` };
+    }
+
+    case EditCommandKind.SetIntent: {
+      if (!step) return { command, ok: false, message: '找不到要改意图的步骤' };
+      const kind = command.payload?.intentKind as VisualIntent['kind'] | undefined;
+      if (!kind) return { command, ok: false, message: '不知道该设成哪种意图' };
+      setManualIntent(ctx, step.id, kind);
+      return { command, ok: true, message: `第 ${stepIndex! + 1} 步的意图已设为「${INTENT_LABELS[kind]}」` };
+    }
+
+    case EditCommandKind.ReSolve: {
+      if (!step) return { command, ok: false, message: '找不到要重解的步骤' };
+      if (!step.intent) {
+        return { command, ok: false, message: `第 ${stepIndex! + 1} 步还没有意图，无法重解——请先指定意图` };
+      }
+      const ok = solveStep(ctx, step.id);
+      return {
+        command,
+        ok,
+        message: ok
+          ? `第 ${stepIndex! + 1} 步已按原意图重新求解`
+          : `第 ${stepIndex! + 1} 步重解未通过，请查看失败详情`,
+      };
+    }
+
+    case EditCommandKind.SetNarration: {
+      if (!step) return { command, ok: false, message: '找不到要改旁白的步骤' };
+      const narration = command.payload?.narration as string | undefined;
+      if (!narration) return { command, ok: false, message: '没有给出新的旁白文本' };
+      updateStepText(ctx, step.id, { narration });
+      return { command, ok: true, message: `第 ${stepIndex! + 1} 步的旁白已更新` };
+    }
+
+    case EditCommandKind.SetDuration: {
+      if (!step) return { command, ok: false, message: '找不到要改时长的步骤' };
+      const durationMs = command.payload?.durationMs as number | undefined;
+      if (!durationMs || durationMs <= 0) return { command, ok: false, message: '时长数值不合法' };
+      updateStepText(ctx, step.id, { durationMs });
+      return { command, ok: true, message: `第 ${stepIndex! + 1} 步的时长已改为 ${(durationMs / 1000).toFixed(1)} 秒` };
+    }
+
+    case EditCommandKind.SetMotion: {
+      if (!step) return { command, ok: false, message: '找不到要加运镜的步骤' };
+      const degrees = command.payload?.degrees as number | undefined;
+      if (!degrees) return { command, ok: false, message: '没有给出环绕角度' };
+      setStepMotion(ctx, step.id, orbitMotion(degrees));
+      return { command, ok: true, message: `第 ${stepIndex! + 1} 步已设置环绕 ${degrees}°` };
+    }
+
+    case EditCommandKind.HideComponents:
+    case EditCommandKind.KeepComponents:
+    case EditCommandKind.HighlightComponents: {
+      if (!step) return { command, ok: false, message: '找不到要调整视觉效果的步骤' };
+      if (command.componentIds.length === 0) {
+        return { command, ok: false, message: '没识别出要调整哪些构件——请指明构件名（如「柱子」「东侧斗拱」）' };
+      }
+      const next = applyComponentEffects(ctx, step, command);
+      ctx.stores.storyboard.set((s) => ({ ...s, storyboard: next }));
+      const verb =
+        command.kind === EditCommandKind.HideComponents ? '隐藏'
+          : command.kind === EditCommandKind.KeepComponents ? '保留' : '高亮';
+      const names = command.componentIds.map((id) => ctx.labelOf(id)).join('、');
+      return { command, ok: true, message: `第 ${stepIndex! + 1} 步已${verb}：${names}` };
+    }
+
+    case EditCommandKind.Retarget: {
+      if (!step) return { command, ok: false, message: '找不到要换目标的步骤' };
+      const id = command.componentIds[0];
+      if (!id) return { command, ok: false, message: '没识别出新的目标构件' };
+      const target = singleTarget(ctx, id);
+      if (!target) return { command, ok: false, message: '新目标不在当前模型中' };
+      const result = redirectStep(ctx, step.id, target);
+      return {
+        command,
+        ok: result.ok,
+        message: result.ok
+          ? `第 ${stepIndex! + 1} 步已换成「${ctx.labelOf(id)}」并按原意图重解，保真度 ${Math.round(result.fidelity * 100)}%`
+          : `换目标后重解未通过：${result.conflicts[0] ?? '约束无法满足'}`,
+      };
+    }
+
+    default:
+      return { command, ok: false, message: `暂不支持这类指令（${command.kind}）` };
+  }
+}
+
+/**
+ * 把「隐藏/保留/高亮」这三类指令写进步骤的视觉效果。
+ *
+ * **两条必须遵守的语义**（否则会做出作者没要求的事）：
+ *  - 「保留」= 从 `hidden` 与 `transparent` 里**移除**，不是加进 `highlight`。
+ *    作者说「别隐藏柱子」时想要的是「柱子照常显示」，不是「柱子发橙光」。
+ *  - 「隐藏」= 加进 `hidden` 并**同时**从 `highlight` 与 `transparent` 移除。
+ *    一个构件不可能既隐藏又高亮；留着会让播放时的呈现自相矛盾。
+ */
+function applyComponentEffects(
+  ctx: CommandContext,
+  step: StoryboardStep,
+  command: EditCommand,
+): Storyboard {
+  const ids = command.componentIds;
+  const sb = currentStoryboard(ctx);
+
+  return updateStep(sb, step.id, (s) => {
+    const hidden = new Set(s.effects.hidden);
+    const highlight = new Set(s.effects.highlight);
+    const transparent = new Map(s.effects.transparent.map((t) => [t.id, t.opacity]));
+
+    if (command.kind === EditCommandKind.HideComponents) {
+      for (const id of ids) {
+        hidden.add(id);
+        highlight.delete(id);
+        transparent.delete(id);
+      }
+    } else if (command.kind === EditCommandKind.KeepComponents) {
+      for (const id of ids) {
+        hidden.delete(id);
+        transparent.delete(id);
+        highlight.add(id);
+      }
+    } else {
+      for (const id of ids) {
+        hidden.delete(id);
+        transparent.delete(id);
+        highlight.add(id);
+      }
+    }
+
+    return {
+      ...s,
+      effects: {
+        highlight: [...highlight],
+        transparent: [...transparent.entries()].map(([id, opacity]) => ({ id, opacity })),
+        hidden: [...hidden],
+      },
+    };
+  });
+}
+
+// ── ★ 反馈驱动的局部调整（开题报告 §3.6）────────────────────────
+
+/**
+ * 执行一次「反馈 → 归因 → 局部调整」。
+ *
+ * **与 `applyInstructions` 的区别**：语言指令是「命令式」（「删掉第三步」），
+ * 反馈是「评价式」（「这个视角看不清」）。评价需要先归因到四类之一，
+ * 而**归因后往往拿不到可执行的动作**（说「看不清」但没说想站哪）——
+ * 此时正确的响应是「按原意图重解一次」（换一个候选机位），而不是瞎猜坐标。
+ * 这条判断在 L3 的 `diagnoseFeedback` 里做，本函数只负责执行它给出的建议。
+ */
+export function applyFeedback(
+  ctx: CommandContext,
+  diagnosis: FeedbackDiagnosis,
+  context: { activeStepId: string | null },
+): InstructionOutcome {
+  const suggestion = diagnosis.suggested;
+  if (!suggestion) {
+    return {
+      command: {
+        kind: 'feedback',
+        stepIndex: diagnosis.stepIndex,
+        componentIds: [],
+        confidence: diagnosis.confidence,
+        rationale: diagnosis.rationale,
+      } as unknown as EditCommand,
+      ok: false,
+      message: `${diagnosis.rationale}（这一步需要你手动确认后再说一次具体怎么改）`,
+    };
+  }
+  const outcomes = applyInstructions(ctx, [suggestion], context);
+  return outcomes[0];
+}
+
+// ── ★ 从生成草稿落成分镜（PPT 第 3 页「01 生成」）────────────────
+
+export interface AdoptDraftOutcome {
+  /** 新建了多少步 */
+  created: number;
+  /** 因构件缺失等原因跳过的步数 */
+  skipped: number;
+  /** 是否需要作者确认（有警告时为真） */
+  needsAttention: boolean;
+  messages: string[];
+}
+
+/**
+ * 把一份生成草稿落成**真实的步骤**。
+ *
+ * **这是「生成」与「编辑」的接缝处，有三件事必须想清楚**：
+ *
+ *  1. **草稿里没有机位**（见 `GenerationDraft` 的说明），因此新建的步骤是
+ *     `solve: 'none'` + `camera: null`，随后由既有求解器按意图求解。
+ *     **求解在这里就地做掉**（`solveStep`），因为作者的预期是「点生成 → 立刻能看到
+ *     一版可播放的讲解」，而不是「得到一堆待求解的空壳」；
+ *  2. **求解失败的步骤保留在分镜里**并标 `failed`，而不是丢弃——FR-19 的立场：
+ *     失败要显式暴露，而不是悄悄少一步。界面会把失败原因显示出来；
+ *  3. **不删除作者已有的步骤**。生成的结果是**追加**在后面的，作者可以自行取舍。
+ *     这避免了「点一下生成，我辛苦编的内容没了」这类不可撤销的破坏。
+ */
+export function adoptDraft(
+  ctx: CommandContext,
+  draft: import('../../domain/generator/types.ts').GenerationDraft,
+  options: { title?: string } = {},
+): AdoptDraftOutcome {
+  const messages: string[] = [];
+  const scene = ctx.stores.scene.get().summary;
+  if (!scene) {
+    ctx.toast('场景尚未就绪，无法生成步骤');
+    return { created: 0, skipped: 0, needsAttention: true, messages: ['场景尚未就绪'] };
+  }
+
+  const sceneIds = new Set(scene.components.map((c) => c.id));
+  const createdIds: string[] = [];
+  let skipped = 0;
+
+  for (const draftStep of draft.steps) {
+    // 草稿在 L3 已经校验过一次构件存在性；这里再核一次是因为**模型可能刚刚换过**
+    if (!sceneIds.has(draftStep.targetId)) {
+      skipped += 1;
+      messages.push(`跳过「${draftStep.title}」：目标构件 ${draftStep.targetId} 不在当前模型里`);
+      continue;
+    }
+    const primary = singleTarget(ctx, draftStep.targetId);
+    if (!primary) {
+      skipped += 1;
+      messages.push(`跳过「${draftStep.title}」：无法解析目标构件`);
+      continue;
+    }
+
+    // 关系型：两端都在模型里才算关系目标，否则退化为单目标——
+    // **退化要说明**，不能让作者以为讲的是关系
+    let target: TargetRef = primary;
+    if (draftStep.partnerId && sceneIds.has(draftStep.partnerId)) {
+      const partnerRef = ctx.refOf(draftStep.partnerId);
+      const selfRef = ctx.refOf(draftStep.targetId);
+      if (partnerRef && selfRef) {
+        target = {
+          form: 'relation',
+          from: { id: selfRef.id, semantics: selfRef.semantics },
+          to: { id: partnerRef.id, semantics: partnerRef.semantics },
+          relation: 'stacked',
+        };
+      }
+    } else if (draftStep.partnerId) {
+      messages.push(`「${draftStep.title}」的关系端构件不在模型里，已退化为单构件目标`);
+    }
+
+    // 意图：用默认谓词组合（与手工选择意图走同一条路）
+    const subjectIds = targetIds(target);
+    const intent: VisualIntent = {
+      id: makeId('intent'),
+      kind: draftStep.intentKind,
+      predicates: defaultPredicatesFor(draftStep.intentKind, subjectIds.length > 1 ? subjectIds : []),
+      provenance: {
+        source: 'language',
+        confidence: 0.7,
+        rationale: `由生成器给出（${draft.generator}）：${draftStep.reason}`,
+        confirmedByUser: false,
+      },
+    };
+
+    const step: StoryboardStep = {
+      ...createStep(target, draftStep.title),
+      narration: draftStep.narration,
+      intent,
+      durationMs: draftStep.durationMs,
+      motion: draftStep.motionDegrees ? orbitMotion(draftStep.motionDegrees) : null,
+      solve: 'stale',
+      solveNote: '由生成器创建，等待按意图求解',
+    };
+
+    const sb = currentStoryboard(ctx);
+    const next = addStep(sb, step);
+    ctx.stores.storyboard.set((s) => ({ ...s, storyboard: next, activeStepId: step.id }));
+    createdIds.push(step.id);
+  }
+
+  // ★ 就地求解：让作者点一次生成就能看到可播放的结果
+  let solved = 0;
+  let failed = 0;
+  for (const id of createdIds) {
+    if (solveStep(ctx, id)) solved += 1;
+    else failed += 1;
+  }
+
+  if (options.title) {
+    const sb = currentStoryboard(ctx);
+    ctx.stores.storyboard.set((s) => ({ ...s, storyboard: { ...sb, title: options.title! } }));
+  }
+
+  messages.push(`已生成 ${createdIds.length} 步，其中 ${solved} 步已求解机位、${failed} 步求解未通过`);
+  if (skipped > 0) messages.push(`跳过 ${skipped} 步（见上方明细）`);
+  if (draft.warnings.length > 0) messages.push(...draft.warnings);
+
+  ctx.toast(`已生成 ${createdIds.length} 步讲解草稿，${solved} 步已求解`);
+  return {
+    created: createdIds.length,
+    skipped,
+    needsAttention: skipped > 0 || failed > 0 || draft.warnings.length > 0,
+    messages,
+  };
 }

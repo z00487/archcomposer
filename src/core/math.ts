@@ -234,6 +234,53 @@ export function quatLookAt(dir: Vec3, up: Vec3 = [0, 1, 0]): Quat {
   return quatFromRotationMatrix3(m);
 }
 
+/**
+ * ★ 环绕：把相机绕「枢轴」的 Y 轴旋转 `radians`，并重新对准枢轴。
+ *
+ * 这是 360° 全景环绕运镜（开题报告 §3.5、答辩 PPT 第 9 页）的唯一计算内核。
+ * 抽在 L1 而不是塞进播放器里，有三个好处：
+ *  - **可单测**：给定同一个位姿与角度，输出必然逐位相同；
+ *  - **播放器不含几何知识**：它只负责在时间轴上取 t，再去问这个函数要位姿；
+ *  - **与求解器无关**：重定向改变的是「起始机位」，环绕是叠加在它上面的相对
+ *    运动，因此换目标之后「绕新目标转一圈」自动成立，不需要另写一套逻辑。
+ *
+ * 两条几何约定：
+ *  - 只在**水平面**内旋转（绕世界 Y 轴），这样俯角在整个环绕过程中保持不变——
+ *    否则相机高度会随角度起伏，观感像在颠簸；
+ *  - 全程**对准枢轴**，因此枢轴在画面中始终居中，转的是建筑而不是相机视野。
+ */
+export function orbitAroundPivot<T extends { position: Vec3; quaternion: Quat }>(
+  pose: T,
+  pivot: Vec3,
+  radians: number,
+): T {
+  const rel: Vec3 = [
+    pose.position[0] - pivot[0],
+    pose.position[1] - pivot[1],
+    pose.position[2] - pivot[2],
+  ];
+  const c = Math.cos(radians);
+  const s = Math.sin(radians);
+  // 绕 Y 轴的旋转矩阵：x' = x·cos + z·sin，z' = -x·sin + z·cos
+  const rotated: Vec3 = [
+    rel[0] * c + rel[2] * s,
+    rel[1],
+    -rel[0] * s + rel[2] * c,
+  ];
+  const position: Vec3 = [
+    pivot[0] + rotated[0],
+    pivot[1] + rotated[1],
+    pivot[2] + rotated[2],
+  ];
+  // 视线方向 = 枢轴 - 相机位置
+  const dir: Vec3 = [pivot[0] - position[0], pivot[1] - position[1], pivot[2] - position[2]];
+  return {
+    ...pose,
+    position,
+    quaternion: quatLookAt(dir),
+  } as T;
+}
+
 /** 3×3 旋转矩阵（行主序，长度 9）→ 四元数。 */
 export function quatFromRotationMatrix3(m: number[]): Quat {
   const [m00, m01, m02, m10, m11, m12, m20, m21, m22] = m;

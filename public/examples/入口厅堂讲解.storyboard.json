@@ -61,6 +61,7 @@
         ],
         "fovY": 0.5235987755982988
       },
+      "motion": null,
       "effects": {
         "highlight": [],
         "transparent": [],
@@ -130,6 +131,7 @@
         ],
         "fovY": 0.5235987755982988
       },
+      "motion": null,
       "effects": {
         "highlight": [
           "demohall@1/column_e__01"
@@ -231,6 +233,7 @@
         ],
         "fovY": 0.7853981633974483
       },
+      "motion": null,
       "effects": {
         "highlight": [
           "demohall@1/column_e__01",
@@ -303,6 +306,7 @@
         ],
         "fovY": 0.5235987755982988
       },
+      "motion": null,
       "effects": {
         "highlight": [
           "demohall@1/column_w__01"
@@ -374,6 +378,7 @@
         ],
         "fovY": 0.5235987755982988
       },
+      "motion": null,
       "effects": {
         "highlight": [
           "demohall@1/purlin_e_front_1"
@@ -389,7 +394,7 @@
   ],
   "schemaVersion": 1,
   "meta": {
-    "updatedAt": "2026-11-22T07:51:11.002Z"
+    "updatedAt": "2026-11-23T03:54:08.502Z"
   },
   "modelRef": {
     "name": "程序生成厅堂（悬山）",

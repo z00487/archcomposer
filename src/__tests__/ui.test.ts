@@ -366,6 +366,7 @@ describe('步骤面板', () => {
       onPreviewStep: () => {},
       onSetIntent: () => {},
       onUpdateText: () => {},
+      onSetMotion: () => {},
       candidates: () => [],
       failureInfo: () => null,
     });
@@ -428,6 +429,7 @@ async function stepPanelWith(
     onPreviewStep: () => {},
     onSetIntent: () => {},
     onUpdateText: () => {},
+    onSetMotion: () => {},
     candidates: () => candidates,
     failureInfo: () => (solve === 'failed'
       ? { conflicts: [], remedies: ['换一个同类构件试试'], note: '求解失败' }

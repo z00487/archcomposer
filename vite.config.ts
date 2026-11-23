@@ -18,8 +18,14 @@
  * 在有正常网络的开发机上两者都可以，换回 jsdom 只需改那一行注释。
  */
 import { defineConfig } from 'vite';
+import { llmProxyPlugin } from './scripts/llm-proxy.mjs';
 
 export default defineConfig({
+  // ★ LLM 代理插件：把 /api/llm 挂到 dev server 上（见 scripts/llm-proxy.mjs）。
+  //   它存在的唯一目的是**把 API key 挡在浏览器之外**——前端只发同源请求，
+  //   由这个中间件带上服务端环境变量里的 key 转发给上游厂商。
+  //   没有配 key 时它回 501，前端据此走离线回退，因此不影响任何离线回归。
+  plugins: [llmProxyPlugin()],
   // 相对基路径。
   //
   // ⚠️ 这**不是**为了「直接用 file:// 双击打开」——本项目做不到那个，

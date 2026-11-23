@@ -34,6 +34,9 @@ import { suggestRemedies, evaluateFidelity } from './domain/fidelity/fidelity.ts
 import type { ConstraintConflict } from './domain/types/solver.ts';
 import type { Storyboard } from './domain/types/storyboard.ts';
 import { deriveSemantics, modelPrefixFromFileName } from './domain/naming/naming.ts';
+import { orbitMotion } from './domain/types/motion.ts';
+import { parseEditInstruction } from './domain/language/instructions.ts';
+import { diagnoseFeedback } from './domain/language/feedback.ts';
 
 // L4
 import { createAppStores, activeStep } from './app/stores/stores.ts';
@@ -42,12 +45,17 @@ import { computeContextIds } from './domain/solver/context.ts';
 import { createPlaybackController } from './app/playback/playback.ts';
 import { downloadStoryboard, readStoryboardFile, loadExampleStoryboard, estimateSize } from './app/io/io.ts';
 import { parseStoryboard } from './app/io/io.ts';
+import { generateDraft } from './app/generate/generate.ts';
+import { loadLlmSettings, saveLlmSettings } from './app/llm/settings-store.ts';
+import { probeLlmProxy } from './app/llm/client.ts';
 
 // L5
 import { byId, fill } from './ui/components/dom.ts';
 import { createComponentPanel, createSemanticsView } from './ui/panels/component-panel.ts';
 import { createStepPanel } from './ui/panels/step-panel.ts';
 import { createInspectorPanel } from './ui/panels/inspector-panel.ts';
+import { createStudioPanel } from './ui/panels/studio-panel.ts';
+import { createSettingsPanel } from './ui/panels/settings-panel.ts';
 import { createTimeline } from './ui/timeline/timeline.ts';
 import { createIntentDialog } from './ui/intent/intent-dialog.ts';
 
@@ -83,11 +91,13 @@ app.innerHTML = `
     </section>
     <aside class="side-panel">
       <div class="tabs" role="tablist">
-        <button class="tab-button active" data-tab="steps" type="button" role="tab">分镜</button>
+        <button class="tab-button active" data-tab="studio" type="button" role="tab">创作</button>
+        <button class="tab-button" data-tab="steps" type="button" role="tab">分镜</button>
         <button class="tab-button" data-tab="components" type="button" role="tab">构件</button>
         <button class="tab-button" data-tab="model" type="button" role="tab">模型</button>
       </div>
-      <div class="tab-panel" data-panel="steps" id="panel-steps"></div>
+      <div class="tab-panel" data-panel="studio" id="panel-studio"></div>
+      <div class="tab-panel" data-panel="steps" id="panel-steps" hidden></div>
       <div class="tab-panel" data-panel="components" id="panel-components" hidden></div>
       <div class="tab-panel" data-panel="model" id="panel-model" hidden></div>
     </aside>
@@ -233,6 +243,10 @@ const stepPanel = createStepPanel({
   },
   onUpdateText: (id, patch) => {
     cmd.updateStepText(ctx, id, patch);
+    refreshAll();
+  },
+  onSetMotion: (id, degrees) => {
+    cmd.setStepMotion(ctx, id, degrees === null ? null : orbitMotion(degrees));
     refreshAll();
   },
   candidates: (id) => cmd.candidateCandidates(ctx, id),
@@ -423,6 +437,7 @@ const playback = createPlaybackController({
   storyboard: stores.storyboard,
   effects,
   viewport,
+  scene: () => stores.scene.get().summary,
 });
 
 const intentDialog = createIntentDialog({
@@ -450,9 +465,172 @@ const intentDialog = createIntentDialog({
   },
 });
 
-// ── 4. 行为 ─────────────────────────────────────────────────────
 
-/** 选构件：拾取、同步 Store、更新面板与特效管理器。 */
+// ── 生成 / 语言编创面板（PPT 第 3 页「01 生成 · 03 编辑」）────────
+
+/**
+ * 面板的 deps 里有**六条**回调，它们共同回答一个问题：
+ * 「作者说了一句话之后，从解析到落库之间发生了什么？」
+ *
+ * 这里刻意把「解析」与「执行」分成两个动作，中间隔着界面上的确认：
+ *  - `onParseInstruction` 只解析 → 写进 language store → 作者核对；
+ *  - `onApplyParsed` 才真正执行。
+ *
+ * **为什么不一步到位直接执行**：自然语言指令必然有理解错的概率。一步到位意味着
+ * 作者要先看着它改错、再自己撤销——撤销还得先想清楚「它刚才到底改了什么」。
+ * 中间加一次确认，把纠错的成本从「撤销」降到「重说一句」。
+ */
+const studioPanel = createStudioPanel({
+  generation: stores.generation,
+  language: stores.language,
+
+  onGenerate: (input) => {
+    stores.generation.set((s) => ({ ...s, running: true, error: null }));
+    void generateDraft(input, {
+      scene: () => stores.scene.get().summary,
+      settings: () => stores.settings.get().llm,
+    })
+      .then((outcome) => {
+        stores.generation.set(() => ({
+          running: false,
+          draft: outcome.draft,
+          source: outcome.source,
+          error: null,
+        }));
+      })
+      .catch((err: unknown) => {
+        // 生成通道内部已经把「网络失败」降级成规则生成；能走到这里的只有
+        // 真正的程序性错误，因此如实报出来而不是吞掉
+        stores.generation.set((s) => ({
+          ...s,
+          running: false,
+          error: `生成失败：${err instanceof Error ? err.message : String(err)}`,
+        }));
+      });
+  },
+
+  onAdoptDraft: (draft) => {
+    const outcome = cmd.adoptDraft(ctx, draft, { title: draft.title });
+    // 被跳过的步骤 / 求解失败的步骤「必须让作者看见」，否则他会以为生成结果完整。
+    // 报在生成区（草稿原来的位置）而不是别处：刚点完「采纳」的目光就在那里，
+    // 报在隔着两段的面板下面等于没报。
+    stores.generation.set(() => ({
+      running: false,
+      draft: null,
+      source: '',
+      error: outcome.needsAttention ? outcome.messages.join('；') : null,
+    }));
+    refreshAll();
+  },
+
+  onDiscardDraft: () => {
+    stores.generation.set((s) => ({ ...s, draft: null, error: null }));
+    refreshAll();
+  },
+
+  onParseInstruction: (text) => {
+    const parsed = parseEditInstruction(text, {
+      scene: stores.scene.get().summary,
+      storyboard: stores.storyboard.get().storyboard,
+      activeStepId: stores.storyboard.get().activeStepId,
+      labelOf: (id) => currentLabelOf(id),
+    });
+    stores.language.set((s) => ({ ...s, parsed, outcomes: [] }));
+    refreshAll();
+  },
+
+  onApplyParsed: () => {
+    const parsed = stores.language.get().parsed;
+    if (!parsed) return;
+    const outcomes = cmd.applyInstructions(ctx, parsed.commands, {
+      activeStepId: stores.storyboard.get().activeStepId,
+    });
+    stores.language.set((s) => ({
+      ...s,
+      parsed: null,
+      outcomes: outcomes.map((o) => ({ ok: o.ok, message: o.message })),
+    }));
+    refreshAll();
+  },
+
+  onClearParsed: () => {
+    stores.language.set((s) => ({ ...s, parsed: null, outcomes: [] }));
+    refreshAll();
+  },
+
+  onFeedback: (text) => {
+    const feedback = diagnoseFeedback(text, {
+      scene: stores.scene.get().summary,
+      storyboard: stores.storyboard.get().storyboard,
+      activeStepId: stores.storyboard.get().activeStepId,
+    });
+    stores.language.set((s) => ({ ...s, feedback, feedbackOutcomes: [] }));
+    refreshAll();
+  },
+
+  onApplyDiagnosis: (index) => {
+    const diagnosis = stores.language.get().feedback?.diagnoses[index];
+    if (!diagnosis) return;
+    const outcome = cmd.applyFeedback(ctx, diagnosis, {
+      activeStepId: stores.storyboard.get().activeStepId,
+    });
+    // 写在**反馈区自己**的结果槽里（不是指令区那个），作者点完按钮立刻能看见
+    stores.language.set((s) => ({
+      ...s,
+      feedbackOutcomes: [{ ok: outcome.ok, message: outcome.message }],
+    }));
+    refreshAll();
+  },
+
+  onQuickOrbit: (degrees) => {
+    const step = activeStep(stores.storyboard.get());
+    if (!step) {
+      toast('请先在分镜里选中一个步骤');
+      return;
+    }
+    cmd.setStepMotion(ctx, step.id, orbitMotion(degrees));
+    refreshAll();
+  },
+});
+
+// ── 大模型设置面板 ───────────────────────────────────────────────
+
+const settingsPanel = createSettingsPanel({
+  settings: stores.settings,
+
+  onSave: (patch) => {
+    const current = stores.settings.get().llm;
+    const next = { ...current, ...patch };
+    const persisted = saveLlmSettings(next);
+    stores.settings.set((s) => ({
+      ...s,
+      llm: next,
+      // 保存后旧的探活结果就作废了（地址或 key 可能变了）
+      proxyReachable: null,
+      proxyHasKey: false,
+      proxyNote: persisted
+        ? '已保存。再「检测代理」确认一下连通性。'
+        : '设置已生效，但没能写进浏览器本地存储（隐私模式？），刷新后会丢失。',
+    }));
+    refreshAll();
+  },
+
+  onProbe: () => {
+    const endpoint = stores.settings.get().llm.endpoint;
+    stores.settings.set((s) => ({ ...s, proxyNote: '正在检测…' }));
+    void probeLlmProxy(endpoint).then((result) => {
+      stores.settings.set((s) => ({
+        ...s,
+        proxyReachable: result.reachable,
+        proxyHasKey: result.hasServerKey,
+        proxyNote: result.note,
+      }));
+      refreshAll();
+    });
+  },
+});
+
+// ── 4. 行为 ─────────────────────────────────────────────────────
 function pickComponent(id: string | null): void {
   selectComponent(id);
   const step = activeStep(stores.storyboard.get());
@@ -676,6 +854,8 @@ function refreshAll(): void {
   stepPanel.render();
   inspector.render();
   timeline.render();
+  studioPanel.render();
+  settingsPanel.render();
 
   const component = stores.selection.get().selectedId ? picker.byId(stores.selection.get().selectedId!) : null;
   const entry = component
@@ -737,9 +917,12 @@ function animate(): void {
 
 // ── 8. 面板挂载 ─────────────────────────────────────────────────
 
+// ★ 生成与语言编创放在第一个标签页，因为它是**流程的第一跳**（PPT 第 5 页）：
+//   作者的入口是「说一句要什么」，不是「手搓第一步」。放在最后等于把它藏起来。
+fill(byId('panel-studio'), [studioPanel.root]);
 fill(byId('panel-steps'), [stepPanel.root]);
 fill(byId('panel-components'), [semanticsView.root, componentPanel.root]);
-fill(byId('panel-model'), [inspector.root]);
+fill(byId('panel-model'), [settingsPanel.root, inspector.root]);
 fill(byId('timeline-host'), [timeline.root]);
 document.body.append(intentDialog.root);
 
@@ -754,15 +937,45 @@ stores.storyboard.subscribe((state, prev) => {
 });
 stores.playback.subscribe(() => timeline.render());
 stores.selection.subscribe(() => refreshAll());
+// 生成与语言这两个 Store 的变化**全部**来自异步回调（生成要等网络、探活要等
+// 请求），因此统一用订阅驱动重绘，而不是让每个回调各自记得调一次 `refreshAll`——
+// 「漏调一次就一直显示转圈」是这类界面最常见的 bug。
+stores.generation.subscribe(() => studioPanel.render());
+stores.language.subscribe(() => studioPanel.render());
+stores.settings.subscribe(() => settingsPanel.render());
 
 // ── 10. 启动 ────────────────────────────────────────────────────
 
 // `currentLabelOf` 在面板创建时就被捕获（闭包），所以必须先它一步设好真实实现
 currentLabelOf = (id) => picker.byId(id)?.displayName ?? id;
 
+// 设置从浏览器本地存储读回来（没有就用默认值）。这一句必须在
+// `settingsPanel.render()` 之前执行，否则界面会先把默认值画一遍再跳变。
+const savedLlm = loadLlmSettings();
+stores.settings.set((s) => ({
+  ...s,
+  llm: savedLlm,
+  proxyNote: savedLlm.apiKey
+    ? '已从浏览器本地存储读回设置（含 key）。建议改为在服务端配置环境变量。'
+    : '尚未探活。点「检测代理」看看 /api/llm 是否就绪。',
+}));
+
 viewport.resize();
 animate();
 loadGeneratedHall();
+refreshAll();
+
+// 启动时自动探一次代理：作者打开「大模型设置」就能看到结论，
+// 而不是先勾选「用大模型」、等 60 秒、再看一句报错。
+void probeLlmProxy(stores.settings.get().llm.endpoint).then((result) => {
+  stores.settings.set((s) => ({
+    ...s,
+    proxyReachable: result.reachable,
+    proxyHasKey: result.hasServerKey,
+    proxyNote: result.note,
+  }));
+  settingsPanel.render();
+});
 
 // 暴露给控制台，方便答辩时现场演示（`__arch` 是刻意的调试入口，不是 API）
 Object.assign(window, { __arch: { stores, ctx, registry, picker, effects, viewport, recorder, cmd } });

@@ -21,6 +21,8 @@ import type { EffectManager } from '../../runtime/effects/effects.ts';
 import type { Viewport } from '../../runtime/scene/viewport.ts';
 import type { StoryboardStep } from '../../domain/types/storyboard.ts';
 import type { Pose } from '../../domain/types/geometry.ts';
+import type { SceneSummary } from '../../domain/types/solver.ts';
+import { poseAtMotion, resolveMotionPivot } from '../../domain/motion/motion.ts';
 import { clonePose, lerp, quatSlerp } from '../../core/math.ts';
 
 export interface PlaybackDeps {
@@ -29,6 +31,8 @@ export interface PlaybackDeps {
   storyboard: StoryboardStore;
   effects: EffectManager;
   viewport: Viewport;
+  /** 场景摘要（可选）：运镜解析枢轴时要用它找目标包围盒中心 */
+  scene?: () => SceneSummary | null;
 }
 
 /** 播放器的对外能力。 */
@@ -137,6 +141,8 @@ export function createPlaybackController(deps: PlaybackDeps): PlaybackController
     // 瞬切模式：时长压到极短，但仍走同一套循环，保证状态一致性
     const effectiveDuration = step.transition === 'cut' ? Math.min(180, duration) : duration;
 
+    const sceneSummary = deps.scene?.() ?? null;
+
     cancelled = false;
     const tick = (): void => {
       if (cancelled) return;
@@ -144,7 +150,15 @@ export function createPlaybackController(deps: PlaybackDeps): PlaybackController
       const t = Math.min(1, (now - start) / effectiveDuration);
       const e = ease(t);
 
-      deps.viewport.setPose(interpolatePose(from, to, e));
+      // ★ 有运镜时，相机走的是「环绕曲线」而不是两点之间的直线补间——
+      //   若这里仍用 interpolatePose(from, to, e)，环绕会被压成一条弦，
+      //   表现为「绕不过去、直接从起点飘到终点」。
+      if (step.motion) {
+        const m = poseAtMotion(step, sceneSummary, e);
+        if (m) deps.viewport.setPose(m);
+      } else {
+        deps.viewport.setPose(interpolatePose(from, to, e));
+      }
 
       // 透明度逐帧插值
       for (const entry of step.effects.transparent) {
@@ -158,11 +172,24 @@ export function createPlaybackController(deps: PlaybackDeps): PlaybackController
         rafId = requestAnimationFrame(tick);
       } else {
         rafId = 0;
-        deps.camera.set((s) => ({ ...s, pose: clonePose(to) }));
+        // 环绕结束时相机停在转完全角处，而不是回到 step.camera。
+        // 记录终点而不是起点，下一步的补间才是从「转完的位置」继续。
+        const settled = step.motion ? (poseAtMotion(step, sceneSummary, 1) ?? to) : to;
+        deps.camera.set((s) => ({ ...s, pose: clonePose(settled) }));
+        // 环绕后的注视点仍在枢轴上，这样用户接手拖动时是绕着目标转的
+        const pivot = step.motion ? tryPivot(step, sceneSummary) : null;
+        if (pivot) deps.viewport.setTarget(pivot);
         onDone();
       }
     };
     rafId = requestAnimationFrame(tick);
+  }
+
+  /** 取这一步环绕的枢轴（没有运镜时返回 null）。 */
+  function tryPivot(step: StoryboardStep, scene: SceneSummary | null): [number, number, number] | null {
+    if (!step.motion) return null;
+    const p = resolveMotionPivot(step.motion, step, scene);
+    return [p[0], p[1], p[2]];
   }
 
   /**

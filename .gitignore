@@ -12,6 +12,13 @@ dist
 dist-ssr
 *.local
 
+# ★ API key 绝不入库：环境变量文件与本地覆盖配置都必须被忽略。
+#   .env.local / *.local 已由上面一条覆盖；这里显式列出 .env 与 .env.*，
+#   因为「把 key 写进 .env 然后忘了它没被忽略」是这类项目最常见的泄密方式。
+.env
+.env.*
+!.env.example
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

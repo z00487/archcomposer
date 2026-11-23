@@ -127,6 +127,7 @@ function normalizeStep(raw: unknown): Storyboard['steps'][number] | null {
     target: s.target as Storyboard['steps'][number]['target'],
     intent: (s.intent ?? null) as Storyboard['steps'][number]['intent'],
     camera: (s.camera ?? null) as Storyboard['steps'][number]['camera'],
+    motion: normalizeMotion(s.motion),
     effects: {
       highlight: Array.isArray(effects.highlight) ? (effects.highlight as string[]) : [],
       transparent: Array.isArray(effects.transparent)
@@ -152,6 +153,25 @@ function normalizeStep(raw: unknown): Storyboard['steps'][number] | null {
 function normalizeSolveState(value: unknown): Storyboard['steps'][number]['solve'] {
   if (value === 'solved' || value === 'stale' || value === 'failed' || value === 'none') return value;
   return 'none';
+}
+
+/**
+ * 运镜字段的归一化（可选字段）。
+ *
+ * **宽容补齐而不是报错**：老分镜文件没有 `motion` 字段，那是完全正常的情况，
+ * 补成 `null`（静态镜头）即可。只有**认得出来的坏数据**才丢弃：
+ * 缺 `kind`、`degrees` 不是有限数、`degrees` 为 0（转了等于没转，无意义）。
+ * 手改文件时写错一个字段不该让整份分镜打不开。
+ */
+function normalizeMotion(value: unknown): Storyboard['steps'][number]['motion'] {
+  if (typeof value !== 'object' || value === null) return null;
+  const m = value as Record<string, unknown>;
+  if (m.kind !== 'orbit') return null;
+  if (typeof m.degrees !== 'number' || !Number.isFinite(m.degrees) || m.degrees === 0) return null;
+  const pivot = Array.isArray(m.pivot) && m.pivot.length === 3 && m.pivot.every((n) => typeof n === 'number')
+    ? (m.pivot as [number, number, number])
+    : null;
+  return { kind: 'orbit', degrees: m.degrees, pivot };
 }
 
 // ── 下载 / 打开 ────────────────────────────────────────────────

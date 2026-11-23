@@ -34,6 +34,8 @@ export class Viewport {
   readonly grid: THREE.GridHelper;
 
   private readonly container: HTMLElement;
+  /** 当前已经挂进 scene 的模型根，用于切模型时把上一棵摘掉。 */
+  private framedRoot: THREE.Object3D | null = null;
 
   constructor(container: HTMLElement, options: SceneOptions = {}) {
     const background = options.background ?? '#eaf0f5';
@@ -118,6 +120,14 @@ export class Viewport {
    * 外部 GLB 则相反，通常需要居中以获得合适的初始视角。
    */
   frame(root: THREE.Object3D, keepOrigin = false): { size: THREE.Vector3; center: THREE.Vector3 } {
+    // **模型必须真的进场景**：注册、拾取、特效都只持有对象引用，谁都不负责把它
+    // 挂到 scene 上。少了这一段，界面会显示「86 个构件」而画面空无一物——
+    // 因为 Box3 从对象自身算得出来，渲染却只认 scene 的子树。
+    // 切模型时先把上一棵摘掉，避免新旧两棵树叠在场景里。
+    if (this.framedRoot && this.framedRoot !== root) this.scene.remove(this.framedRoot);
+    if (!this.scene.children.includes(root)) this.scene.add(root);
+    this.framedRoot = root;
+
     const box = new THREE.Box3().setFromObject(root);
     const size = box.getSize(new THREE.Vector3());
     const center = box.getCenter(new THREE.Vector3());

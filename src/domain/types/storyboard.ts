@@ -12,6 +12,7 @@ import type { ComponentId } from './component.ts';
 import type { VisualEffects } from './solver.ts';
 import type { TargetRef } from './solver.ts';
 import type { VisualIntent, IntentPrediction, IntentSignal } from './intent.ts';
+import type { CameraMotion } from './motion.ts';
 
 // ── §5.6 求解状态 ──────────────────────────────────────────────
 export const SolveState = {
@@ -59,6 +60,17 @@ export interface StoryboardStep {
   intent: VisualIntent | null;
   /** ④ 相机：当前已知的最优解。可能因未求解或已失效而为 null */
   camera: Pose | null;
+  /**
+   * ⑦ 运镜：镜头在这一步期间的**自身运动**（如 360° 环绕）。
+   *
+   * 可选字段。缺失（undefined）表示静态镜头——这一步的观感与加这个字段之前完全一致，
+   * 因此按文档三 §3.5.1 的规则，**加它不递 `schemaVersion`**（新增可选字段属兼容变更，
+   * 老文件缺它就取默认值）。
+   *
+   * `camera` 是运镜的**起点**而不是终点：环绕结束时相机停在全角处。这样重定向重解
+   * `camera` 与「环绕多少度」互不干扰——换目标后仍然是「绕新目标转一圈」。
+   */
+  motion?: CameraMotion | null;
   /** ⑤ 视觉效果 */
   effects: VisualEffects;
   /** ⑥ 时长与转场 */
@@ -167,6 +179,7 @@ export function createStep(target: TargetRef, title = '新步骤'): StoryboardSt
     target,
     intent: null,
     camera: null,
+    motion: null,
     effects: { ...EMPTY_EFFECTS, highlight: [], transparent: [], hidden: [] },
     durationMs: DEFAULT_STEP_DURATION_MS,
     transition: 'smooth',

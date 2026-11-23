@@ -21,6 +21,8 @@ import { SOLVE_STATE_LABELS } from '../types/storyboard.ts';
 import { targetIds } from '../types/solver.ts';
 import type { TargetRef, VisualEffects } from '../types/solver.ts';
 import type { VisualIntent } from '../types/intent.ts';
+import type { CameraMotion } from '../types/motion.ts';
+import { describeMotion } from '../types/motion.ts';
 import type { ComponentId } from '../types/component.ts';
 import { makeId } from '../../core/id.ts';
 import { clonePose } from '../../core/math.ts';
@@ -174,6 +176,7 @@ export function duplicateStep(storyboard: Storyboard, stepId: string): Storyboar
     target: cloneTarget(source.target),
     intent: cloneIntent(source.intent),
     camera: source.camera ? clonePose(source.camera) : null,
+    motion: cloneMotion(source.motion ?? null),
     effects: cloneEffects(source.effects),
   };
   const steps = [...storyboard.steps];
@@ -354,6 +357,15 @@ export function cloneEffects(effects: VisualEffects): VisualEffects {
   };
 }
 
+/** 深拷贝运镜（枢轴是数组，必须复制）。`null` 原样返回。 */
+export function cloneMotion(motion: CameraMotion | null): CameraMotion | null {
+  if (!motion) return null;
+  return {
+    ...motion,
+    pivot: motion.pivot ? [motion.pivot[0], motion.pivot[1], motion.pivot[2]] : null,
+  };
+}
+
 function clampIndex(index: number, max: number): number {
   if (!Number.isFinite(index)) return max;
   return Math.max(0, Math.min(Math.trunc(index), max));
@@ -392,5 +404,6 @@ export function describeStep(step: StoryboardStep, labelOf: (id: ComponentId) =>
   const targetText = targetIds_.map(labelOf).join(' / ');
   const stateText = SOLVE_STATE_LABELS[step.solve];
   const intentText = step.intent ? step.intent.provenance.rationale || step.intent.kind : '未指定意图';
-  return `${targetText} · ${intentText} · ${stateText}`;
+  const motionText = step.motion ? ` · ${describeMotion(step.motion)}` : '';
+  return `${targetText} · ${intentText} · ${stateText}${motionText}`;
 }

@@ -17,6 +17,7 @@ import type { StoryboardStep, SolveState } from '../../domain/types/storyboard.t
 import { SOLVE_STATE_LABELS } from '../../domain/types/storyboard.ts';
 import type { ComponentId } from '../../domain/types/component.ts';
 import type { ConstraintConflict } from '../../domain/types/solver.ts';
+import { MOTION_PRESETS } from '../../domain/types/motion.ts';
 import { el, fill, solveStateClass } from '../components/dom.ts';
 
 /** 面板需要的宿主能力。全部由 main.ts 注入，面板自身不含业务规则。 */
@@ -48,6 +49,8 @@ export interface StepPanelDeps {
   onPreviewStep(id: string): void;
   onSetIntent(id: string, kind: string): void;
   onUpdateText(id: string, patch: { title?: string; narration?: string; durationMs?: number }): void;
+  /** 设置运镜（degrees 为 null 表示改为静态镜头） */
+  onSetMotion(id: string, degrees: number | null): void;
   /** 候选替换列表 */
   candidates(id: string): ComponentId[];
   /** 失败详情（冲突 + 建议），由 L4 提供 */
@@ -169,6 +172,28 @@ export function createStepPanel(deps: StepPanelDeps): StepPanel {
       duration,
     ]);
 
+    // ── 运镜（开题报告 §3.5、PPT 第 9 页的「全景环绕 · 360°」）──
+    const motionSelect = el('select', { class: 'step-motion-select', 'aria-label': '设置运镜' }) as HTMLSelectElement;
+    motionSelect.append(el('option', { value: '', text: '静态镜头（不动）' }));
+    for (const preset of MOTION_PRESETS) {
+      const option = el('option', {
+        value: String(preset.degrees),
+        text: preset.label,
+      }) as HTMLOptionElement;
+      if (step.motion?.kind === 'orbit' && step.motion.degrees === preset.degrees) option.selected = true;
+      motionSelect.append(option);
+    }
+    motionSelect.addEventListener('change', () => {
+      const raw = motionSelect.value;
+      deps.onSetMotion(step.id, raw === '' ? null : Number(raw));
+    });
+    motionSelect.addEventListener('click', (event) => event.stopPropagation());
+
+    const motionRow = el('div', { class: 'step-motion-row' }, [
+      el('label', { text: '运镜' }),
+      motionSelect,
+    ]);
+
     // ── ★ 意图选择（FR-14 的「人工确认」路径，也是 §6.1 的失败兜底）──
     const intentSelect = el('select', { class: 'step-intent-select', 'aria-label': '设置意图' }) as HTMLSelectElement;
     intentSelect.append(el('option', { value: '', text: '选择意图类型…' }));
@@ -230,7 +255,7 @@ export function createStepPanel(deps: StepPanelDeps): StepPanel {
       solveButton, redirectButton, previewButton, duplicateButton, deleteButton,
     ]);
 
-    const children: Node[] = [header, summary, intentSelect, narration, durationRow, actions];
+    const children: Node[] = [header, summary, intentSelect, narration, durationRow, motionRow, actions];
     const failure = deps.failureInfo(step.id);
     if (failure) children.push(renderFailure(step, failure));
 

@@ -14,12 +14,14 @@
     "smoke:naming": "node --experimental-strip-types src/domain/naming/smoke.ts",
     "smoke:model": "node --experimental-strip-types src/domain/model/smoke.ts",
     "smoke": "npm run smoke:naming && npm run smoke:model",
-    "verify": "npm run check && npm run check:layering && npm run gen:model && npm run verify:output && npm run smoke && npm run walkthrough && npm run test",
+    "verify": "npm run check && npm run check:layering && npm run gen:model && npm run verify:output && npm run smoke && npm run smoke:generate && npm run walkthrough && npm run test",
     "test": "vitest run",
     "test:watch": "vitest",
     "demo:redirect": "node --experimental-strip-types scripts/demo-redirect.ts",
     "gen:example": "node --experimental-strip-types scripts/emit-example.ts",
-    "walkthrough": "node --experimental-strip-types scripts/walkthrough.ts"
+    "walkthrough": "node --experimental-strip-types scripts/walkthrough.ts",
+    "llm:proxy": "node scripts/llm-proxy.mjs",
+    "smoke:generate": "node --experimental-strip-types scripts/smoke-generate.ts"
   },
   "devDependencies": {
     "@types/three": "^0.186.0",
