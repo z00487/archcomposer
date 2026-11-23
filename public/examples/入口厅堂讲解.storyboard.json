@@ -1,0 +1,399 @@
+{
+  "id": "sb_001",
+  "title": "入口厅堂讲解",
+  "steps": [
+    {
+      "id": "step_002",
+      "title": "总览：这座厅堂是什么",
+      "narration": "先看一眼整体：单檐悬山，三开间，坐落在台基上。",
+      "target": {
+        "form": "single",
+        "component": {
+          "id": "demohall@1/plinth",
+          "semantics": {
+            "kind": "plinth",
+            "part": "",
+            "label": "台基"
+          }
+        }
+      },
+      "intent": {
+        "id": "intent_step_002",
+        "kind": "SHOW_OVERVIEW",
+        "predicates": [
+          {
+            "measure": "elevationRatio",
+            "subjects": [],
+            "test": {
+              "op": ">=",
+              "value": 0.45
+            },
+            "weight": 1
+          },
+          {
+            "measure": "visible",
+            "subjects": [],
+            "test": {
+              "op": "==",
+              "value": 1
+            },
+            "weight": 1
+          }
+        ],
+        "provenance": {
+          "source": "manual",
+          "confidence": 1,
+          "rationale": "由用户手动指定为「总体俯瞰」——讲解从整体开始",
+          "confirmedByUser": true
+        }
+      },
+      "camera": {
+        "position": [
+          0,
+          18.507578697353694,
+          27.38133436024349
+        ],
+        "quaternion": [
+          -0.29552020666133966,
+          0,
+          0,
+          0.9553364891256061
+        ],
+        "fovY": 0.5235987755982988
+      },
+      "effects": {
+        "highlight": [],
+        "transparent": [],
+        "hidden": []
+      },
+      "durationMs": 4000,
+      "transition": "smooth",
+      "solve": "solved",
+      "solveNote": "已求解，保真度 100%（960 个候选）"
+    },
+    {
+      "id": "step_003",
+      "title": "东侧檐柱",
+      "narration": "注意这根檐柱：它落在柱础上，柱头承着斗拱。",
+      "target": {
+        "form": "single",
+        "component": {
+          "id": "demohall@1/column_e__01",
+          "semantics": {
+            "kind": "column",
+            "part": "e",
+            "label": "东侧柱"
+          }
+        }
+      },
+      "intent": {
+        "id": "intent_step_003",
+        "kind": "EMPHASIZE",
+        "predicates": [
+          {
+            "measure": "screenCoverage",
+            "subjects": [],
+            "test": {
+              "op": ">=",
+              "value": 0.12
+            },
+            "weight": 1
+          },
+          {
+            "measure": "unoccluded",
+            "subjects": [],
+            "test": {
+              "op": "==",
+              "value": 1
+            },
+            "weight": 1
+          }
+        ],
+        "provenance": {
+          "source": "demo",
+          "confidence": 0.84,
+          "rationale": "示范时相机明显靠近该构件，且它被单独高亮",
+          "confirmedByUser": true
+        }
+      },
+      "camera": {
+        "position": [
+          5.5,
+          4.4844268829381555,
+          6.631476705602585
+        ],
+        "quaternion": [
+          -0.2955202066613395,
+          0,
+          0,
+          0.9553364891256061
+        ],
+        "fovY": 0.5235987755982988
+      },
+      "effects": {
+        "highlight": [
+          "demohall@1/column_e__01"
+        ],
+        "transparent": [],
+        "hidden": []
+      },
+      "durationMs": 4000,
+      "transition": "smooth",
+      "solve": "solved",
+      "solveNote": "已求解，保真度 100%（960 个候选）"
+    },
+    {
+      "id": "step_004",
+      "title": "斗拱与柱的关系",
+      "narration": "斗拱坐在柱头上，把上面的荷载传给柱子。",
+      "target": {
+        "form": "relation",
+        "from": {
+          "id": "demohall@1/column_e__01",
+          "semantics": {
+            "kind": "column",
+            "part": "e",
+            "label": "东侧柱"
+          }
+        },
+        "to": {
+          "id": "demohall@1/dougong_se__01",
+          "semantics": {
+            "kind": "dougong",
+            "part": "se",
+            "label": "前檐东转角斗拱"
+          }
+        },
+        "relation": "bear"
+      },
+      "intent": {
+        "id": "intent_step_004",
+        "kind": "REVEAL_RELATION",
+        "predicates": [
+          {
+            "measure": "coVisible",
+            "subjects": [
+              "demohall@1/column_e__01",
+              "demohall@1/dougong_se__01"
+            ],
+            "test": {
+              "op": "==",
+              "value": 1
+            },
+            "weight": 1
+          },
+          {
+            "measure": "screenDistance",
+            "subjects": [
+              "demohall@1/column_e__01",
+              "demohall@1/dougong_se__01"
+            ],
+            "test": {
+              "op": "in",
+              "value": [
+                0.12,
+                1.1
+              ]
+            },
+            "weight": 1
+          },
+          {
+            "measure": "unoccluded",
+            "subjects": [
+              "demohall@1/column_e__01",
+              "demohall@1/dougong_se__01"
+            ],
+            "test": {
+              "op": "==",
+              "value": 1
+            },
+            "weight": 1
+          }
+        ],
+        "provenance": {
+          "source": "demo",
+          "confidence": 0.76,
+          "rationale": "示范中先后操作了两个构件，且相机取中——像是在说明它们的关系",
+          "confirmedByUser": true
+        }
+      },
+      "camera": {
+        "position": [
+          5.5,
+          5.37447067600662,
+          8.922744954502724
+        ],
+        "quaternion": [
+          -0.17410813759359595,
+          0,
+          0,
+          0.9847265389049336
+        ],
+        "fovY": 0.7853981633974483
+      },
+      "effects": {
+        "highlight": [
+          "demohall@1/column_e__01",
+          "demohall@1/dougong_se__01"
+        ],
+        "transparent": [],
+        "hidden": []
+      },
+      "durationMs": 4000,
+      "transition": "smooth",
+      "solve": "solved",
+      "solveNote": "已求解，保真度 100%（960 个候选）"
+    },
+    {
+      "id": "step_005",
+      "title": "西侧檐柱（同一构图，换目标）",
+      "narration": "西侧同样是一根檐柱，做法对称。",
+      "target": {
+        "form": "single",
+        "component": {
+          "id": "demohall@1/column_w__01",
+          "semantics": {
+            "kind": "column",
+            "part": "w",
+            "label": "西侧柱"
+          }
+        }
+      },
+      "intent": {
+        "id": "intent_step_005",
+        "kind": "EMPHASIZE",
+        "predicates": [
+          {
+            "measure": "screenCoverage",
+            "subjects": [],
+            "test": {
+              "op": ">=",
+              "value": 0.12
+            },
+            "weight": 1
+          },
+          {
+            "measure": "unoccluded",
+            "subjects": [],
+            "test": {
+              "op": "==",
+              "value": 1
+            },
+            "weight": 1
+          }
+        ],
+        "provenance": {
+          "source": "inherited",
+          "confidence": 0.84,
+          "rationale": "由上一步的意图继承而来——重定向时意图不变，只换目标",
+          "confirmedByUser": true
+        }
+      },
+      "camera": {
+        "position": [
+          -5.5,
+          4.4844268829381555,
+          6.631476705602585
+        ],
+        "quaternion": [
+          -0.2955202066613395,
+          0,
+          0,
+          0.9553364891256061
+        ],
+        "fovY": 0.5235987755982988
+      },
+      "effects": {
+        "highlight": [
+          "demohall@1/column_w__01"
+        ],
+        "transparent": [],
+        "hidden": []
+      },
+      "durationMs": 4000,
+      "transition": "smooth",
+      "solve": "solved",
+      "solveNote": "已求解，保真度 100%（960 个候选）"
+    },
+    {
+      "id": "step_006",
+      "title": "檩条（减少遮挡）",
+      "narration": "檩条架在梁上。这一步要求「看得见、不挡」——求解器会先找一个本来就看得清的角度，只有找不到时才把挡路的构件调透明。",
+      "target": {
+        "form": "single",
+        "component": {
+          "id": "demohall@1/purlin_e_front_1",
+          "semantics": {
+            "kind": "purlin",
+            "part": "e-front-1",
+            "label": "东侧前檐檐檩"
+          }
+        }
+      },
+      "intent": {
+        "id": "intent_step_006",
+        "kind": "REDUCE_OCCLUSION",
+        "predicates": [
+          {
+            "measure": "unoccluded",
+            "subjects": [],
+            "test": {
+              "op": "==",
+              "value": 1
+            },
+            "weight": 1
+          },
+          {
+            "measure": "visible",
+            "subjects": [],
+            "test": {
+              "op": "==",
+              "value": 1
+            },
+            "weight": 1
+          }
+        ],
+        "provenance": {
+          "source": "demo",
+          "confidence": 0.71,
+          "rationale": "示范中把遮挡构件调成了半透明，而不是隐藏——保留了空间参照",
+          "confirmedByUser": true
+        }
+      },
+      "camera": {
+        "position": [
+          0,
+          4.9400189405172386,
+          12.384941397044281
+        ],
+        "quaternion": [
+          -0.07492970727274237,
+          0,
+          0,
+          0.9971888181122076
+        ],
+        "fovY": 0.5235987755982988
+      },
+      "effects": {
+        "highlight": [
+          "demohall@1/purlin_e_front_1"
+        ],
+        "transparent": [],
+        "hidden": []
+      },
+      "durationMs": 4000,
+      "transition": "smooth",
+      "solve": "solved",
+      "solveNote": "已求解，保真度 100%（960 个候选）"
+    }
+  ],
+  "schemaVersion": 1,
+  "meta": {
+    "updatedAt": "2026-11-22T07:51:11.002Z"
+  },
+  "modelRef": {
+    "name": "程序生成厅堂（悬山）",
+    "componentCount": 86,
+    "modelPrefix": "demohall"
+  }
+}

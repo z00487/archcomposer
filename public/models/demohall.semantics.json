@@ -1,0 +1,610 @@
+{
+  "schemaVersion": 1,
+  "model": "demohall.geometry.json",
+  "unit": "m",
+  "note": "由程序化生成器自动写出（规范 §8.1），非人工标注",
+  "components": [
+    {
+      "node": "plinth",
+      "kind": "plinth",
+      "part": "",
+      "label": "台基",
+      "confidence": "generated"
+    },
+    {
+      "node": "column_e__01",
+      "kind": "column",
+      "part": "e",
+      "label": "东侧柱",
+      "confidence": "generated"
+    },
+    {
+      "node": "columnbase_e__01",
+      "kind": "columnbase",
+      "part": "e",
+      "label": "东侧柱础",
+      "confidence": "generated"
+    },
+    {
+      "node": "column_e__02",
+      "kind": "column",
+      "part": "e",
+      "label": "东侧柱",
+      "confidence": "generated"
+    },
+    {
+      "node": "columnbase_e__02",
+      "kind": "columnbase",
+      "part": "e",
+      "label": "东侧柱础",
+      "confidence": "generated"
+    },
+    {
+      "node": "column_c__01",
+      "kind": "column",
+      "part": "c",
+      "label": "中央柱",
+      "confidence": "generated"
+    },
+    {
+      "node": "columnbase_c__01",
+      "kind": "columnbase",
+      "part": "c",
+      "label": "中央柱础",
+      "confidence": "generated"
+    },
+    {
+      "node": "column_c__02",
+      "kind": "column",
+      "part": "c",
+      "label": "中央柱",
+      "confidence": "generated"
+    },
+    {
+      "node": "columnbase_c__02",
+      "kind": "columnbase",
+      "part": "c",
+      "label": "中央柱础",
+      "confidence": "generated"
+    },
+    {
+      "node": "column_c__03",
+      "kind": "column",
+      "part": "c",
+      "label": "中央柱",
+      "confidence": "generated"
+    },
+    {
+      "node": "columnbase_c__03",
+      "kind": "columnbase",
+      "part": "c",
+      "label": "中央柱础",
+      "confidence": "generated"
+    },
+    {
+      "node": "column_c__04",
+      "kind": "column",
+      "part": "c",
+      "label": "中央柱",
+      "confidence": "generated"
+    },
+    {
+      "node": "columnbase_c__04",
+      "kind": "columnbase",
+      "part": "c",
+      "label": "中央柱础",
+      "confidence": "generated"
+    },
+    {
+      "node": "column_w__01",
+      "kind": "column",
+      "part": "w",
+      "label": "西侧柱",
+      "confidence": "generated"
+    },
+    {
+      "node": "columnbase_w__01",
+      "kind": "columnbase",
+      "part": "w",
+      "label": "西侧柱础",
+      "confidence": "generated"
+    },
+    {
+      "node": "column_w__02",
+      "kind": "column",
+      "part": "w",
+      "label": "西侧柱",
+      "confidence": "generated"
+    },
+    {
+      "node": "columnbase_w__02",
+      "kind": "columnbase",
+      "part": "w",
+      "label": "西侧柱础",
+      "confidence": "generated"
+    },
+    {
+      "node": "dougong_se__01",
+      "kind": "dougong",
+      "part": "se",
+      "label": "前檐东转角斗拱",
+      "confidence": "generated"
+    },
+    {
+      "node": "dougong_sw__01",
+      "kind": "dougong",
+      "part": "sw",
+      "label": "前檐西转角斗拱",
+      "confidence": "generated"
+    },
+    {
+      "node": "dougong_ne__01",
+      "kind": "dougong",
+      "part": "ne",
+      "label": "后檐东转角斗拱",
+      "confidence": "generated"
+    },
+    {
+      "node": "dougong_nw__01",
+      "kind": "dougong",
+      "part": "nw",
+      "label": "后檐西转角斗拱",
+      "confidence": "generated"
+    },
+    {
+      "node": "dougong_c_front__01",
+      "kind": "dougong",
+      "part": "c-front",
+      "label": "中央前檐斗拱",
+      "confidence": "generated"
+    },
+    {
+      "node": "dougong_c_front__02",
+      "kind": "dougong",
+      "part": "c-front",
+      "label": "中央前檐斗拱",
+      "confidence": "generated"
+    },
+    {
+      "node": "dougong_c_back__01",
+      "kind": "dougong",
+      "part": "c-back",
+      "label": "中央后檐斗拱",
+      "confidence": "generated"
+    },
+    {
+      "node": "dougong_c_back__02",
+      "kind": "dougong",
+      "part": "c-back",
+      "label": "中央后檐斗拱",
+      "confidence": "generated"
+    },
+    {
+      "node": "beam_w__01",
+      "kind": "beam",
+      "part": "w",
+      "label": "西侧梁",
+      "confidence": "generated"
+    },
+    {
+      "node": "beam_w__02",
+      "kind": "beam",
+      "part": "w",
+      "label": "西侧梁",
+      "confidence": "generated"
+    },
+    {
+      "node": "beam_c__01",
+      "kind": "beam",
+      "part": "c",
+      "label": "中央梁",
+      "confidence": "generated"
+    },
+    {
+      "node": "beam_c__02",
+      "kind": "beam",
+      "part": "c",
+      "label": "中央梁",
+      "confidence": "generated"
+    },
+    {
+      "node": "beam_e__01",
+      "kind": "beam",
+      "part": "e",
+      "label": "东侧梁",
+      "confidence": "generated"
+    },
+    {
+      "node": "beam_e__02",
+      "kind": "beam",
+      "part": "e",
+      "label": "东侧梁",
+      "confidence": "generated"
+    },
+    {
+      "node": "purlin_e_front_1",
+      "kind": "purlin",
+      "part": "e-front-1",
+      "label": "东侧前檐檐檩",
+      "confidence": "generated"
+    },
+    {
+      "node": "purlin_e_front_2",
+      "kind": "purlin",
+      "part": "e-front-2",
+      "label": "东侧前檐金檩",
+      "confidence": "generated"
+    },
+    {
+      "node": "purlin_e_front_3",
+      "kind": "purlin",
+      "part": "e-front-3",
+      "label": "东侧前檐脊檩",
+      "confidence": "generated"
+    },
+    {
+      "node": "purlin_e_back_1",
+      "kind": "purlin",
+      "part": "e-back-1",
+      "label": "东侧后檐檐檩",
+      "confidence": "generated"
+    },
+    {
+      "node": "purlin_e_back_2",
+      "kind": "purlin",
+      "part": "e-back-2",
+      "label": "东侧后檐金檩",
+      "confidence": "generated"
+    },
+    {
+      "node": "purlin_e_back_3",
+      "kind": "purlin",
+      "part": "e-back-3",
+      "label": "东侧后檐脊檩",
+      "confidence": "generated"
+    },
+    {
+      "node": "purlin_c_front_1",
+      "kind": "purlin",
+      "part": "c-front-1",
+      "label": "中央前檐檐檩",
+      "confidence": "generated"
+    },
+    {
+      "node": "purlin_c_front_2",
+      "kind": "purlin",
+      "part": "c-front-2",
+      "label": "中央前檐金檩",
+      "confidence": "generated"
+    },
+    {
+      "node": "purlin_c_front_3",
+      "kind": "purlin",
+      "part": "c-front-3",
+      "label": "中央前檐脊檩",
+      "confidence": "generated"
+    },
+    {
+      "node": "purlin_c_back_1",
+      "kind": "purlin",
+      "part": "c-back-1",
+      "label": "中央后檐檐檩",
+      "confidence": "generated"
+    },
+    {
+      "node": "purlin_c_back_2",
+      "kind": "purlin",
+      "part": "c-back-2",
+      "label": "中央后檐金檩",
+      "confidence": "generated"
+    },
+    {
+      "node": "purlin_c_back_3",
+      "kind": "purlin",
+      "part": "c-back-3",
+      "label": "中央后檐脊檩",
+      "confidence": "generated"
+    },
+    {
+      "node": "purlin_w_front_1",
+      "kind": "purlin",
+      "part": "w-front-1",
+      "label": "西侧前檐檐檩",
+      "confidence": "generated"
+    },
+    {
+      "node": "purlin_w_front_2",
+      "kind": "purlin",
+      "part": "w-front-2",
+      "label": "西侧前檐金檩",
+      "confidence": "generated"
+    },
+    {
+      "node": "purlin_w_front_3",
+      "kind": "purlin",
+      "part": "w-front-3",
+      "label": "西侧前檐脊檩",
+      "confidence": "generated"
+    },
+    {
+      "node": "purlin_w_back_1",
+      "kind": "purlin",
+      "part": "w-back-1",
+      "label": "西侧后檐檐檩",
+      "confidence": "generated"
+    },
+    {
+      "node": "purlin_w_back_2",
+      "kind": "purlin",
+      "part": "w-back-2",
+      "label": "西侧后檐金檩",
+      "confidence": "generated"
+    },
+    {
+      "node": "purlin_w_back_3",
+      "kind": "purlin",
+      "part": "w-back-3",
+      "label": "西侧后檐脊檩",
+      "confidence": "generated"
+    },
+    {
+      "node": "rafter_e_front__01",
+      "kind": "rafter",
+      "part": "e-front",
+      "label": "东侧前檐椽",
+      "confidence": "generated"
+    },
+    {
+      "node": "rafter_e_front__02",
+      "kind": "rafter",
+      "part": "e-front",
+      "label": "东侧前檐椽",
+      "confidence": "generated"
+    },
+    {
+      "node": "rafter_e_front__03",
+      "kind": "rafter",
+      "part": "e-front",
+      "label": "东侧前檐椽",
+      "confidence": "generated"
+    },
+    {
+      "node": "rafter_e_front__04",
+      "kind": "rafter",
+      "part": "e-front",
+      "label": "东侧前檐椽",
+      "confidence": "generated"
+    },
+    {
+      "node": "rafter_e_front__05",
+      "kind": "rafter",
+      "part": "e-front",
+      "label": "东侧前檐椽",
+      "confidence": "generated"
+    },
+    {
+      "node": "rafter_e_front__06",
+      "kind": "rafter",
+      "part": "e-front",
+      "label": "东侧前檐椽",
+      "confidence": "generated"
+    },
+    {
+      "node": "rafter_e_front__07",
+      "kind": "rafter",
+      "part": "e-front",
+      "label": "东侧前檐椽",
+      "confidence": "generated"
+    },
+    {
+      "node": "rafter_e_front__08",
+      "kind": "rafter",
+      "part": "e-front",
+      "label": "东侧前檐椽",
+      "confidence": "generated"
+    },
+    {
+      "node": "rafter_w_front__01",
+      "kind": "rafter",
+      "part": "w-front",
+      "label": "西侧前檐椽",
+      "confidence": "generated"
+    },
+    {
+      "node": "rafter_w_front__02",
+      "kind": "rafter",
+      "part": "w-front",
+      "label": "西侧前檐椽",
+      "confidence": "generated"
+    },
+    {
+      "node": "rafter_w_front__03",
+      "kind": "rafter",
+      "part": "w-front",
+      "label": "西侧前檐椽",
+      "confidence": "generated"
+    },
+    {
+      "node": "rafter_w_front__04",
+      "kind": "rafter",
+      "part": "w-front",
+      "label": "西侧前檐椽",
+      "confidence": "generated"
+    },
+    {
+      "node": "rafter_w_front__05",
+      "kind": "rafter",
+      "part": "w-front",
+      "label": "西侧前檐椽",
+      "confidence": "generated"
+    },
+    {
+      "node": "rafter_w_front__06",
+      "kind": "rafter",
+      "part": "w-front",
+      "label": "西侧前檐椽",
+      "confidence": "generated"
+    },
+    {
+      "node": "rafter_w_front__07",
+      "kind": "rafter",
+      "part": "w-front",
+      "label": "西侧前檐椽",
+      "confidence": "generated"
+    },
+    {
+      "node": "rafter_w_front__08",
+      "kind": "rafter",
+      "part": "w-front",
+      "label": "西侧前檐椽",
+      "confidence": "generated"
+    },
+    {
+      "node": "rafter_e_back__01",
+      "kind": "rafter",
+      "part": "e-back",
+      "label": "东侧后檐椽",
+      "confidence": "generated"
+    },
+    {
+      "node": "rafter_e_back__02",
+      "kind": "rafter",
+      "part": "e-back",
+      "label": "东侧后檐椽",
+      "confidence": "generated"
+    },
+    {
+      "node": "rafter_e_back__03",
+      "kind": "rafter",
+      "part": "e-back",
+      "label": "东侧后檐椽",
+      "confidence": "generated"
+    },
+    {
+      "node": "rafter_e_back__04",
+      "kind": "rafter",
+      "part": "e-back",
+      "label": "东侧后檐椽",
+      "confidence": "generated"
+    },
+    {
+      "node": "rafter_e_back__05",
+      "kind": "rafter",
+      "part": "e-back",
+      "label": "东侧后檐椽",
+      "confidence": "generated"
+    },
+    {
+      "node": "rafter_e_back__06",
+      "kind": "rafter",
+      "part": "e-back",
+      "label": "东侧后檐椽",
+      "confidence": "generated"
+    },
+    {
+      "node": "rafter_e_back__07",
+      "kind": "rafter",
+      "part": "e-back",
+      "label": "东侧后檐椽",
+      "confidence": "generated"
+    },
+    {
+      "node": "rafter_e_back__08",
+      "kind": "rafter",
+      "part": "e-back",
+      "label": "东侧后檐椽",
+      "confidence": "generated"
+    },
+    {
+      "node": "rafter_w_back__01",
+      "kind": "rafter",
+      "part": "w-back",
+      "label": "西侧后檐椽",
+      "confidence": "generated"
+    },
+    {
+      "node": "rafter_w_back__02",
+      "kind": "rafter",
+      "part": "w-back",
+      "label": "西侧后檐椽",
+      "confidence": "generated"
+    },
+    {
+      "node": "rafter_w_back__03",
+      "kind": "rafter",
+      "part": "w-back",
+      "label": "西侧后檐椽",
+      "confidence": "generated"
+    },
+    {
+      "node": "rafter_w_back__04",
+      "kind": "rafter",
+      "part": "w-back",
+      "label": "西侧后檐椽",
+      "confidence": "generated"
+    },
+    {
+      "node": "rafter_w_back__05",
+      "kind": "rafter",
+      "part": "w-back",
+      "label": "西侧后檐椽",
+      "confidence": "generated"
+    },
+    {
+      "node": "rafter_w_back__06",
+      "kind": "rafter",
+      "part": "w-back",
+      "label": "西侧后檐椽",
+      "confidence": "generated"
+    },
+    {
+      "node": "rafter_w_back__07",
+      "kind": "rafter",
+      "part": "w-back",
+      "label": "西侧后檐椽",
+      "confidence": "generated"
+    },
+    {
+      "node": "rafter_w_back__08",
+      "kind": "rafter",
+      "part": "w-back",
+      "label": "西侧后檐椽",
+      "confidence": "generated"
+    },
+    {
+      "node": "ridge",
+      "kind": "ridge",
+      "part": "",
+      "label": "正脊",
+      "confidence": "generated"
+    },
+    {
+      "node": "roof_front",
+      "kind": "roof",
+      "part": "front",
+      "label": "前檐屋面",
+      "confidence": "generated"
+    },
+    {
+      "node": "roof_back",
+      "kind": "roof",
+      "part": "back",
+      "label": "后檐屋面",
+      "confidence": "generated"
+    },
+    {
+      "node": "gable_e",
+      "kind": "gable",
+      "part": "e",
+      "label": "东侧山墙",
+      "confidence": "generated"
+    },
+    {
+      "node": "gable_w",
+      "kind": "gable",
+      "part": "w",
+      "label": "西侧山墙",
+      "confidence": "generated"
+    }
+  ]
+}

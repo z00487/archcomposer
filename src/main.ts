@@ -1,279 +1,772 @@
+/**
+ * 应用入口 —— **只负责装配**（《项目概要设计文档》§7.3）
+ *
+ * 本文件曾经把 UI 骨架、场景装配、拾取、特效全写在一起（约 280 行）。
+ * 现在它的职责收窄到三件事：
+ *
+ *   1. 创建各层实例；
+ *   2. 把依赖接起来（L4 的 CommandContext、L5 各面板的 deps）；
+ *   3. 订阅 Store，把状态变化映射成界面重绘。
+ *
+ * **一条纪律：本文件不写业务逻辑。** 判「红色」是为了什么、什么时候标 stale、
+ * 求解失败了怎么办——这些都在 L3/L4 里，这里只把结果呈现出去。
+ */
 import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
 import './style.css';
+
+// L1
+import { clonePose } from './core/math.ts';
+
+// L2
+import { buildModelGroup, type GeometryFile } from './runtime/generated-model.ts';
+import { registerModel, toSceneSummary, searchComponents } from './runtime/model/registry.ts';
+import { Viewport } from './runtime/scene/viewport.ts';
+import { EffectManager } from './runtime/effects/effects.ts';
+import { Picker } from './runtime/picking/picker.ts';
+import { DemoRecorder } from './runtime/demo/recorder.ts';
+
+// L3
+import { createDefaultRegistry } from './domain/solver/registry.ts';
+import { analyzeDemo } from './domain/intent/rules.ts';
+import { suggestRemedies, evaluateFidelity } from './domain/fidelity/fidelity.ts';
+import type { ConstraintConflict } from './domain/types/solver.ts';
+import type { Storyboard } from './domain/types/storyboard.ts';
+import { deriveSemantics, modelPrefixFromFileName } from './domain/naming/naming.ts';
+
+// L4
+import { createAppStores, activeStep } from './app/stores/stores.ts';
+import * as cmd from './app/commands/commands.ts';
+import { computeContextIds } from './domain/solver/context.ts';
+import { createPlaybackController } from './app/playback/playback.ts';
+import { downloadStoryboard, readStoryboardFile, loadExampleStoryboard, estimateSize } from './app/io/io.ts';
+import { parseStoryboard } from './app/io/io.ts';
+
+// L5
+import { byId, fill } from './ui/components/dom.ts';
+import { createComponentPanel, createSemanticsView } from './ui/panels/component-panel.ts';
+import { createStepPanel } from './ui/panels/step-panel.ts';
+import { createInspectorPanel } from './ui/panels/inspector-panel.ts';
+import { createTimeline } from './ui/timeline/timeline.ts';
+import { createIntentDialog } from './ui/intent/intent-dialog.ts';
+
+// ── 1. 界面骨架 ─────────────────────────────────────────────────
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 app.innerHTML = `
   <header class="topbar">
     <div class="brand-mark">A</div>
-    <div class="brand-copy"><strong>ArchComposer</strong><span>建筑三维可视化解说编创 · Demo 01</span></div>
-    <div class="top-status"><i></i> 三维场景运行中</div>
+    <div class="brand-copy"><strong>ArchComposer</strong><span>建筑三维可视化解说编创</span></div>
+    <div class="top-status"><i></i> <span id="model-status">正在载入模型…</span></div>
   </header>
   <main class="workspace">
     <section class="viewport-panel">
-      <div class="viewport-head"><div><strong>三维场景</strong><span id="scene-subtitle">示例建筑 · 可交互预览</span></div><button id="reset-camera" class="quiet-button">⟲ 重置视角</button></div>
+      <div class="viewport-head">
+        <div><strong>三维场景</strong><span id="scene-subtitle">示例建筑 · 可交互预览</span></div>
+        <div class="viewport-status">
+          <span id="object-count">构件 0</span>
+          <button id="reset-camera" class="quiet-button" type="button">⟲ 重置视角</button>
+        </div>
+      </div>
       <div id="viewport" class="viewport">
-        <div class="viewport-hint">左键拖动旋转 · 滚轮缩放 · 右键平移</div>
+        <div class="viewport-hint">左键拖动旋转 · 滚轮缩放 · 右键平移 · 点击构件选中</div>
         <div id="loading" class="loading">正在构建三维场景…</div>
         <div id="toast" class="toast"></div>
       </div>
-      <div class="viewport-footer"><span><b class="dot blue"></b> 左键选择构件</span><span><b class="dot orange"></b> 橙色表示当前选中</span><span id="object-count">构件 0</span></div>
+      <div class="viewport-footer">
+        <span><b class="dot blue"></b> 左键选择构件</span>
+        <span><b class="dot orange"></b> 橙色表示当前选中</span>
+        <span id="dirty-indicator"></span>
+      </div>
+      <div id="timeline-host"></div>
     </section>
     <aside class="side-panel">
-      <section class="side-section intro"><div class="eyebrow">INSPECTOR</div><h1>构件检查器</h1><p>选择建筑构件，并调整它在讲解中的视觉表现。</p></section>
-      <section class="side-section"><div class="section-title"><strong>构件列表</strong><span id="component-count" class="count-pill">0</span></div><div id="component-list" class="component-list"><div class="empty-state">场景初始化中…</div></div></section>
-      <section class="side-section selected-section"><div class="section-title"><strong>当前构件</strong><span class="live-label">LIVE</span></div><div id="selected-name" class="selected-name">尚未选择构件</div><div id="selected-type" class="muted">点击场景中的构件开始编辑</div>
-        <div class="control-block"><div class="control-label"><label for="opacity">透明度</label><strong id="opacity-value">100%</strong></div><input id="opacity" type="range" min="10" max="100" value="100" disabled /><div class="range-ends"><span>更透明</span><span>不透明</span></div></div>
-        <div class="action-grid"><button id="highlight" class="action-button primary" disabled><span>✦</span> 高亮构件</button><button id="toggle-visible" class="action-button" disabled><span>◉</span> 隐藏构件</button></div>
-        <button id="restore" class="restore-button" disabled>恢复该构件默认状态</button>
-      </section>
-      <section class="side-section tips"><div class="section-title"><strong>操作说明</strong></div><ol><li>在左侧场景中点击建筑构件。</li><li>使用高亮突出讲解目标。</li><li>拖动透明度滑块观察内部结构。</li><li>隐藏构件后，可从构件列表恢复选择。</li></ol></section>
-      <section class="side-section model-section"><div class="section-title"><strong>加载自定义模型</strong></div><p class="muted small">支持本地 .glb / .gltf 文件。建议优先使用 GLB 单文件模型。</p><label class="upload-button" for="model-file">＋ 选择 GLB / GLTF 文件</label><input id="model-file" type="file" accept=".glb,.gltf,model/gltf-binary,model/gltf+json" hidden /></section>
+      <div class="tabs" role="tablist">
+        <button class="tab-button active" data-tab="steps" type="button" role="tab">分镜</button>
+        <button class="tab-button" data-tab="components" type="button" role="tab">构件</button>
+        <button class="tab-button" data-tab="model" type="button" role="tab">模型</button>
+      </div>
+      <div class="tab-panel" data-panel="steps" id="panel-steps"></div>
+      <div class="tab-panel" data-panel="components" id="panel-components" hidden></div>
+      <div class="tab-panel" data-panel="model" id="panel-model" hidden></div>
     </aside>
   </main>
-  <footer class="app-footer"><span>ArchComposer · Three.js + TypeScript</span><span>阶段一：三维场景与构件视觉操作</span></footer>
+  <footer class="app-footer">
+    <span>ArchComposer · Three.js + TypeScript</span>
+    <span>阶段二：分镜 · 意图推断 · 意图保持重定向</span>
+  </footer>
 `;
 
-const viewport = document.querySelector<HTMLDivElement>('#viewport')!;
-const loading = document.querySelector<HTMLDivElement>('#loading')!;
-const toast = document.querySelector<HTMLDivElement>('#toast')!;
-const componentList = document.querySelector<HTMLDivElement>('#component-list')!;
-const selectedName = document.querySelector<HTMLDivElement>('#selected-name')!;
-const selectedType = document.querySelector<HTMLDivElement>('#selected-type')!;
-const opacitySlider = document.querySelector<HTMLInputElement>('#opacity')!;
-const opacityValue = document.querySelector<HTMLElement>('#opacity-value')!;
-const highlightButton = document.querySelector<HTMLButtonElement>('#highlight')!;
-const visibilityButton = document.querySelector<HTMLButtonElement>('#toggle-visible')!;
-const restoreButton = document.querySelector<HTMLButtonElement>('#restore')!;
-const modelFile = document.querySelector<HTMLInputElement>('#model-file')!;
+const viewportHost = byId<HTMLDivElement>('viewport');
+const loading = byId<HTMLDivElement>('loading');
+const toastNode = byId<HTMLDivElement>('toast');
 
-const scene = new THREE.Scene();
-scene.background = new THREE.Color('#eaf0f5');
-scene.fog = new THREE.Fog('#eaf0f5', 22, 65);
-const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 200);
-camera.position.set(10, 8, 12);
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
-viewport.appendChild(renderer.domElement);
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.06;
-controls.target.set(0, 1.8, 0);
-controls.minDistance = 3;
-controls.maxDistance = 40;
+// ── 2. 各层实例 ─────────────────────────────────────────────────
 
-scene.add(new THREE.HemisphereLight(0xffffff, 0x8a9bad, 2.0));
-const keyLight = new THREE.DirectionalLight(0xffffff, 3.0);
-keyLight.position.set(8, 14, 7); keyLight.castShadow = true;
-keyLight.shadow.mapSize.set(2048, 2048); scene.add(keyLight);
-const fillLight = new THREE.DirectionalLight(0xd7e8ff, 1.2); fillLight.position.set(-8, 7, -6); scene.add(fillLight);
-const ground = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshStandardMaterial({ color: '#dce4eb', roughness: 1 }));
-ground.rotation.x = -Math.PI / 2; ground.position.y = -0.04; ground.receiveShadow = true; ground.name = '场景地面'; scene.add(ground);
-const grid = new THREE.GridHelper(40, 40, 0xb6c5d3, 0xd0dbe4); grid.position.y = -0.025; scene.add(grid);
+const viewport = new Viewport(viewportHost);
+const effects = new EffectManager();
+const picker = new Picker();
+const recorder = new DemoRecorder();
+const registry = createDefaultRegistry();
+const stores = createAppStores();
 
-const raycaster = new THREE.Raycaster();
-const pointer = new THREE.Vector2();
-let root: THREE.Object3D | null = null;
-let selected: THREE.Object3D | null = null;
-let selectable: THREE.Object3D[] = [];
+/** 作者为这次示范写的旁白。它参与意图推断（FR-13），是「状态差异」之外的第二条通道。 */
+let demoNarrationText = '';
+
 let toastTimer = 0;
-type MaterialState = { material: THREE.Material; color?: THREE.Color; emissive?: THREE.Color; emissiveIntensity?: number; opacity: number; transparent: boolean; depthWrite: boolean };
-const initialStates = new WeakMap<THREE.Object3D, MaterialState[]>();
-const originalNames = new WeakMap<THREE.Object3D, string>();
-const highlighted = new WeakSet<THREE.Object3D>();
+function toast(message: string): void {
+  toastNode.textContent = message;
+  toastNode.classList.add('show');
+  window.clearTimeout(toastTimer);
+  toastTimer = window.setTimeout(() => toastNode.classList.remove('show'), 2600);
+}
 
-function materialsOf(object: THREE.Object3D): THREE.Material[] {
-  const mesh = object as THREE.Mesh;
-  if (!mesh.isMesh || !mesh.material) return [];
-  return Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-}
-function rememberState(object: THREE.Object3D) {
-  if (initialStates.has(object)) return;
-  // Clone mesh materials so editing one mesh does not unintentionally affect other meshes sharing a GLTF material.
-  const mesh = object as THREE.Mesh;
-  if (mesh.isMesh && mesh.material) {
-    mesh.material = Array.isArray(mesh.material) ? mesh.material.map(material => material.clone()) : mesh.material.clone();
-  }
-  initialStates.set(object, materialsOf(object).map(material => {
-    const m = material as THREE.MeshStandardMaterial;
-    return { material, color: m.color?.clone(), emissive: m.emissive?.clone(), emissiveIntensity: m.emissiveIntensity, opacity: material.opacity, transparent: material.transparent, depthWrite: material.depthWrite };
-  }));
-  originalNames.set(object, object.name || '未命名构件');
-}
-function setHighlight(object: THREE.Object3D, enabled: boolean) {
-  materialsOf(object).forEach(material => {
-    const m = material as THREE.MeshStandardMaterial;
-    if (enabled && m.emissive) { m.emissive.set('#ff8a24'); m.emissiveIntensity = 0.85; }
-    else {
-      const state = initialStates.get(object)?.find(s => s.material === material);
-      if (state && m.emissive) { m.emissive.copy(state.emissive ?? new THREE.Color(0)); m.emissiveIntensity = state.emissiveIntensity ?? 1; }
+/** 宿主能力：L4 命令层通过它回调 L2/L5，而命令层本身不 import three。 */
+const ctx: cmd.CommandContext = {
+  stores,
+  registry,
+  effects,
+  refOf(id) {
+    const component = picker.byId(id);
+    return component ? { id: component.id, semantics: component.semantics } : null;
+  },
+  labelOf(id) {
+    const component = picker.byId(id);
+    return component ? component.displayName : id;
+  },
+  applyCamera(pose) {
+    viewport.setPose(pose);
+    stores.camera.set((s) => ({ ...s, pose: clonePose(pose) }));
+  },
+  focusOn(id) {
+    const component = picker.byId(id);
+    if (!component) return;
+    const { min, max } = component.aabb;
+    viewport.setTarget([(min[0] + max[0]) / 2, (min[1] + max[1]) / 2, (min[2] + max[2]) / 2]);
+  },
+  toast,
+};
+
+// ── 3. L5 面板 ──────────────────────────────────────────────────
+
+const semanticSearch = { query: '' };
+let currentLabelOf = (id: string): string => id;
+
+const componentPanel = createComponentPanel({
+  selection: stores.selection,
+  list: () => {
+    const model = picker.model;
+    if (!model) return [];
+    return searchComponents(model, semanticSearch.query);
+  },
+  onPick: (id) => pickComponent(id),
+  onSearch: (query) => {
+    semanticSearch.query = query;
+  },
+  labelOf: (id) => currentLabelOf(id),
+  statusOf: (id) => {
+    const step = activeStep(stores.storyboard.get());
+    if (step && step.target.form === 'single' && step.target.component.id === id) return '步骤目标';
+    if (step && step.target.form === 'relation' && (step.target.from.id === id || step.target.to.id === id)) return '步骤目标';
+    return '';
+  },
+});
+
+const semanticsView = createSemanticsView();
+
+const stepPanel = createStepPanel({
+  storyboard: stores.storyboard,
+  selection: stores.selection,
+  scene: stores.scene,
+  labelOf: (id) => currentLabelOf(id),
+  onAddStep: () => {
+    const stepId = cmd.addStepFromSelection(ctx);
+    if (stepId) refreshAll();
+  },
+  onDeleteStep: (id) => {
+    cmd.deleteStep(ctx, id);
+    refreshAll();
+  },
+  onDuplicateStep: (id) => {
+    cmd.duplicateStep(ctx, id);
+    refreshAll();
+  },
+  onMoveStep: (from, to) => {
+    cmd.moveStep(ctx, from, to);
+    refreshAll();
+  },
+  onSelectStep: (id) => {
+    cmd.setActiveStep(ctx, id);
+    const step = activeStep(stores.storyboard.get());
+    if (step?.camera) playback.previewStep(stores.storyboard.get().storyboard.steps.findIndex((s) => s.id === id));
+    refreshAll();
+  },
+  onRedirectStep: (id, candidateId) => {
+    // 指定了候选（点了失败区里的 chip）→ 就换成那一个；
+    // 没指定（工具条上的按钮）→ 取排序第一的候选（命名规范 §7.3 的推荐顺序）
+    let target = candidateId;
+    if (!target) {
+      const candidates = cmd.candidateCandidates(ctx, id);
+      if (candidates.length === 0) {
+        toast('没有找到可替换的同类构件');
+        return;
+      }
+      target = candidates[0];
     }
-    material.needsUpdate = true;
-  });
-  if (enabled) highlighted.add(object); else highlighted.delete(object);
-}
-function restoreObject(object: THREE.Object3D) {
-  const states = initialStates.get(object) ?? [];
-  states.forEach(state => {
-    const material = state.material as THREE.MeshStandardMaterial;
-    if (state.color && material.color) material.color.copy(state.color);
-    if (state.emissive && material.emissive) material.emissive.copy(state.emissive);
-    if (state.emissiveIntensity !== undefined && 'emissiveIntensity' in material) material.emissiveIntensity = state.emissiveIntensity;
-    material.opacity = state.opacity; material.transparent = state.transparent; material.depthWrite = state.depthWrite; material.needsUpdate = true;
-  });
-  object.visible = true; highlighted.delete(object);
-}
-function toastMessage(message: string) {
-  toast.textContent = message; toast.classList.add('show');
-  window.clearTimeout(toastTimer); toastTimer = window.setTimeout(() => toast.classList.remove('show'), 2300);
-}
-function meshObjects(container: THREE.Object3D): THREE.Object3D[] {
-  const list: THREE.Object3D[] = [];
-  container.traverse(object => { if ((object as THREE.Mesh).isMesh && object !== ground) list.push(object); });
-  return list;
-}
-function safeName(object: THREE.Object3D, index: number) {
-  if (!originalNames.has(object)) originalNames.set(object, object.name?.trim() || `建筑构件 ${String(index + 1).padStart(2, '0')}`);
-  return originalNames.get(object)!;
-}
-function rebuildComponentList() {
-  componentList.innerHTML = '';
-  selectable.forEach((object, index) => {
-    const row = document.createElement('button'); row.className = 'component-row'; row.dataset.index = String(index);
-    if (object === selected) row.classList.add('active');
-    if (!object.visible) row.classList.add('is-hidden');
-    const type = (object as THREE.Mesh).geometry?.type ?? 'Mesh';
-    row.innerHTML = `<span class="component-icon">${object.visible ? '◇' : '◌'}</span><span class="component-copy"><strong></strong><small></small></span><span class="row-eye">${object.visible ? '●' : '○'}</span>`;
-    row.querySelector('strong')!.textContent = safeName(object, index);
-    row.querySelector('small')!.textContent = type + (highlighted.has(object) ? ' · 已高亮' : '');
-    row.addEventListener('click', () => { if (!object.visible) { object.visible = true; } selectObject(object); });
-    componentList.appendChild(row);
-  });
-  document.querySelector('#component-count')!.textContent = String(selectable.length);
-  document.querySelector('#object-count')!.textContent = `构件 ${selectable.length}`;
-}
-function selectObject(object: THREE.Object3D | null) {
-  if (selected && selected !== object && highlighted.has(selected)) setHighlight(selected, false);
-  selected = object;
-  document.querySelectorAll<HTMLButtonElement>('.component-row').forEach(row => row.classList.toggle('active', Number(row.dataset.index) === selectable.indexOf(object!)));
-  if (!object) {
-    selectedName.textContent = '尚未选择构件'; selectedType.textContent = '点击场景中的构件开始编辑';
-    opacitySlider.disabled = highlightButton.disabled = visibilityButton.disabled = restoreButton.disabled = true;
-  } else {
-    selectedName.textContent = safeName(object, selectable.indexOf(object));
-    selectedType.textContent = `${(object as THREE.Mesh).geometry?.type ?? '3D Object'} · ${object.visible ? '可见' : '已隐藏'}`;
-    opacitySlider.disabled = highlightButton.disabled = visibilityButton.disabled = restoreButton.disabled = false;
-    const material = materialsOf(object)[0];
-    const opacity = material ? Math.round(material.opacity * 100) : 100;
-    opacitySlider.value = String(opacity); opacityValue.textContent = `${opacity}%`;
-    highlightButton.classList.toggle('is-active', highlighted.has(object));
-    visibilityButton.innerHTML = object.visible ? '<span>◉</span> 隐藏构件' : '<span>◉</span> 显示构件';
+    const result = cmd.replaceWithSameKind(ctx, id, target);
+    reportRedirect(result);
+    refreshAll();
+  },
+  onSolveStep: (id) => {
+    cmd.solveStep(ctx, id);
+    refreshAll();
+  },
+  onPreviewStep: (id) => {
+    const steps = stores.storyboard.get().storyboard.steps;
+    playback.previewStep(steps.findIndex((s) => s.id === id));
+    refreshAll();
+  },
+  onSetIntent: (id, kind) => {
+    cmd.setManualIntent(ctx, id, kind as never);
+    refreshAll();
+  },
+  onUpdateText: (id, patch) => {
+    cmd.updateStepText(ctx, id, patch);
+    refreshAll();
+  },
+  candidates: (id) => cmd.candidateCandidates(ctx, id),
+  failureInfo: (id) => failureInfoOf(id),
+});
+
+const inspectorDeps: Parameters<typeof createInspectorPanel>[0] = {
+  selection: stores.selection,
+  labelOf: (id) => currentLabelOf(id),
+  idOf: (id) => id,
+  semanticsOf: (id) => {
+    const component = picker.byId(id);
+    if (!component) return null;
+    const report = picker.model?.nameReport;
+    const warnings = report?.entries.find((e) => e.nodeName === component.nodeName)?.warnings ?? [];
+    return { kind: component.semantics.kind, part: component.semantics.part, warnings };
+  },
+  onOpacity: (value) => {
+    const id = stores.selection.get().selectedId;
+    if (!id) return;
+    const component = picker.byId(id);
+    if (!component) return;
+    effects.setOpacity(component.object, value);
+    if (recorder.recording) recorder.setOpacity(id, value);
+    inspector.setOpacityDisplay(value);
+  },
+  onToggleHighlight: () => {
+    const id = stores.selection.get().selectedId;
+    if (!id) return;
+    const component = picker.byId(id);
+    if (!component) return;
+    const enable = !effects.isHighlighted(component.object);
+    effects.setHighlight(component.object, enable);
+    if (recorder.recording) recorder.setHighlight(id, enable);
+    inspector.setHighlightActive(enable);
+  },
+  onToggleVisible: () => {
+    const id = stores.selection.get().selectedId;
+    if (!id) return;
+    const component = picker.byId(id);
+    if (!component) return;
+    const visible = !component.object.visible;
+    effects.setVisible(component.object, visible);
+    if (recorder.recording) recorder.setVisibility(id, visible);
+    inspector.setVisibilityLabel(visible);
+    componentPanel.render();
+  },
+  onRestore: () => {
+    const id = stores.selection.get().selectedId;
+    if (!id) return;
+    const component = picker.byId(id);
+    if (!component) return;
+    effects.restore(component.object);
+    selectComponent(id);
+    toast('已恢复该构件的默认状态');
+  },
+  isRecording: () => recorder.recording,
+  demoNarration: () => demoNarrationText,
+  onDemoNarration: (text) => {
+    demoNarrationText = text;
+  },
+  onStartDemo: () => {
+    recorder.start();
+    stores.demo.set((s) => ({ ...s, recording: true, actionCount: 0, pending: null }));
+    toast('示范录制已开始：选构件、转相机、调透明度，完成后点「结束示范」');
+    refreshAll();
+  },
+  onFinishDemo: () => {
+    const outcome = recorder.stop(viewport.getPose());
+    if (!outcome) return;
+    const scene = stores.scene.get().summary;
+    if (!scene) return;
+    // ★ FR-13 的自然语言通道：把作者写的旁白一并交给推断，
+    //   与「状态差异」这条通道并列——两条通道都进 signals，由打分统一权衡
+    const bundle = analyzeDemo(outcome.outcome, scene, demoNarrationText);
+    stores.demo.set((s) => ({ ...s, lastRecord: outcome.record }));
+    cmd.finishDemo(ctx, { ...bundle, outcome: outcome.outcome });
+    intentDialog.open({ ...bundle, outcome: outcome.outcome });
+    refreshAll();
+  },
+  onPickModel: (file) => loadExternalModel(file),
+
+  // ── 存档（FR-10）────────────────────────────────────────────
+  onSaveStoryboard: () => {
+    const validation = cmd.validateCurrent(ctx);
+    if (validation.errors.length > 0) {
+      // §4.5：error 阻断保存，且必须把每一条都说清楚
+      toast(`保存被阻断：${validation.errors[0]}`);
+      refreshAll();
+      return;
+    }
+    cmd.stampModelRef(ctx);
+    const board = stores.storyboard.get().storyboard;
+    downloadStoryboard(board);
+    toast(
+      validation.warnings.length > 0
+        ? `已保存（有 ${validation.warnings.length} 条提示：${validation.warnings[0]}）`
+        : `已保存分镜「${board.title}」`,
+    );
+  },
+  onOpenStoryboard: (file) => {
+    void readStoryboardFile(file).then((result) => {
+      if (!result.ok || !result.storyboard) {
+        toast(`打开失败：${result.errors[0] ?? '未知原因'}`);
+        return;
+      }
+      adoptStoryboard(result.storyboard);
+      toast(
+        result.warnings.length > 0
+          ? `已打开，但有 ${result.warnings.length} 条提示：${result.warnings[0]}`
+          : `已打开分镜「${result.storyboard.title}」`,
+      );
+    });
+  },
+  onLoadExample: () => {
+    void loadExampleStoryboard().then((result) => {
+      if (!result.ok || !result.storyboard) {
+        toast(`示例分镜载入失败：${result.errors[0] ?? '未知原因'}`);
+        return;
+      }
+      adoptStoryboard(result.storyboard);
+      toast('已载入示例分镜');
+    });
+  },
+  saveInfo: () => {
+    const validation = cmd.validateCurrent(ctx);
+    const board = stores.storyboard.get().storyboard;
+    const stats = derivedStats(board.steps);
+    return {
+      detail: `${stats.total} 个步骤 · 已求解 ${stats.solved} / 待重算 ${stats.stale} / 失败 ${stats.failed} · 约 ${(estimateSize(board) / 1024).toFixed(1)} KB`,
+      blocked: validation.errors,
+    };
+  },
+  onCommitToStep: () => {
+    const id = stores.selection.get().selectedId;
+    if (!id) {
+      toast('请先选择一个构件');
+      return;
+    }
+    const stepId = cmd.addStepFromSelection(ctx);
+    if (!stepId) return;
+    // 把当前的视觉状态（高亮/透明度/隐藏）写进这一步
+    const captured = effects.capture();
+    const step = stores.storyboard.get().storyboard.steps.find((s) => s.id === stepId);
+    if (step) {
+      cmd.updateStepText(ctx, stepId, { title: step.title });
+      const next = {
+        ...stores.storyboard.get().storyboard,
+        steps: stores.storyboard.get().storyboard.steps.map((s) =>
+          s.id === stepId
+            ? { ...s, effects: captured, camera: viewport.getPose(), solve: 'solved' as const, solveNote: '机位与视觉状态来自当前视口' }
+            : s,
+        ),
+      };
+      stores.storyboard.set((s) => ({ ...s, storyboard: next }));
+    }
+    toast('已把当前视觉状态记入新步骤');
+    refreshAll();
+  },
+};
+
+const inspector = createInspectorPanel(inspectorDeps);
+
+const timeline = createTimeline({
+  storyboard: stores.storyboard,
+  playback: stores.playback,
+  onPlay: () => {
+    playback.play(0);
+    refreshAll();
+  },
+  onPause: () => {
+    playback.pause();
+    refreshAll();
+  },
+  onStop: () => {
+    playback.stop();
+    refreshAll();
+  },
+  onSeek: (index) => {
+    playback.previewStep(index);
+    refreshAll();
+  },
+});
+
+const playback = createPlaybackController({
+  playback: stores.playback,
+  camera: stores.camera,
+  storyboard: stores.storyboard,
+  effects,
+  viewport,
+});
+
+const intentDialog = createIntentDialog({
+  onAccept: (prediction) => {
+    cmd.acceptPrediction(ctx, prediction);
+    intentDialog.close();
+    refreshAll();
+  },
+  onManual: (kind) => {
+    // 「手动选择」这条路：直接给当前选中构件建一个新步骤
+    cmd.addStepFromSelection(ctx);
+    const steps = stores.storyboard.get().storyboard.steps;
+    const newest = steps[steps.length - 1];
+    if (newest) {
+      cmd.setManualIntent(ctx, newest.id, kind as never);
+      cmd.solveStep(ctx, newest.id);
+    }
+    intentDialog.close();
+    refreshAll();
+  },
+  onSkip: () => {
+    intentDialog.close();
+    toast('已跳过意图指定，可稍后在步骤面板里选择');
+    refreshAll();
+  },
+});
+
+// ── 4. 行为 ─────────────────────────────────────────────────────
+
+/** 选构件：拾取、同步 Store、更新面板与特效管理器。 */
+function pickComponent(id: string | null): void {
+  selectComponent(id);
+  const step = activeStep(stores.storyboard.get());
+  if (recorder.recording) {
+    if (id) recorder.select(id);
+    else recorder.deselect();
   }
-  rebuildComponentList();
+  void step;
 }
-function registerRoot(object: THREE.Object3D, label: string) {
-  if (root) scene.remove(root);
-  root = object; scene.add(root);
-  selectable = meshObjects(root);
-  selectable.forEach((mesh, i) => { rememberState(mesh); safeName(mesh, i); mesh.castShadow = true; mesh.receiveShadow = true; });
-  const box = new THREE.Box3().setFromObject(root);
-  if (!box.isEmpty()) {
-    const size = box.getSize(new THREE.Vector3()); const center = box.getCenter(new THREE.Vector3());
-    root.position.sub(center); // center model around world origin
-    controls.target.set(0, Math.max(0.8, size.y * 0.42), 0);
-    const maxDim = Math.max(size.x, size.y, size.z, 2);
-    camera.position.set(maxDim * 1.35, maxDim * 0.95, maxDim * 1.55);
-    camera.near = Math.max(0.01, maxDim / 1000); camera.far = maxDim * 100; camera.updateProjectionMatrix();
-    controls.minDistance = maxDim * 0.12; controls.maxDistance = maxDim * 8;
+
+function selectComponent(id: string | null): void {
+  stores.selection.set((s) => ({ ...s, selectedId: id }));
+
+  const component = id ? picker.byId(id) : null;
+  if (component) {
+    const material = (component.object as THREE.Mesh).material as THREE.MeshStandardMaterial | undefined;
+    inspector.setOpacityDisplay(material?.opacity ?? 1);
+    inspector.setHighlightActive(effects.isHighlighted(component.object));
+    inspector.setVisibilityLabel(component.object.visible);
   }
-  controls.update();
-  document.querySelector('#scene-subtitle')!.textContent = label;
-  loading.classList.add('hidden'); selectObject(null); rebuildComponentList();
+  inspector.render();
 }
-function createDemoBuilding(): THREE.Group {
-  const building = new THREE.Group(); building.name = '示例建筑';
-  const mats = {
-    wall: new THREE.MeshStandardMaterial({ color: '#d9dfe4', roughness: 0.78 }),
-    glass: new THREE.MeshStandardMaterial({ color: '#75a9c4', roughness: 0.24, metalness: 0.12 }),
-    roof: new THREE.MeshStandardMaterial({ color: '#526575', roughness: 0.8 }),
-    column: new THREE.MeshStandardMaterial({ color: '#f0eee8', roughness: 0.65 }),
-    base: new THREE.MeshStandardMaterial({ color: '#aab7c2', roughness: 0.9 }),
-    accent: new THREE.MeshStandardMaterial({ color: '#bd8052', roughness: 0.72 }),
+
+/** 报告重定向的结果（FR-18 / FR-19 的界面反馈）。 */
+function reportRedirect(result: { ok: boolean; fidelity: number; warnings: string[]; conflicts: string[] }): void {
+  if (result.warnings.length > 0) {
+    // 非同类构件的警告必须让用户看到（§6.2 步骤 ⑦）
+    toast(result.warnings[0]);
+    return;
+  }
+  if (result.ok) {
+    toast(`已按原意图重解，保真度 ${Math.round(result.fidelity * 100)}%`);
+  } else if (result.conflicts.length > 0) {
+    toast(`重解未通过：${result.conflicts[0]}`);
+  }
+}
+
+/** 取出某步骤的失败详情（冲突清单 + 替代建议）。 */
+function failureInfoOf(stepId: string): { conflicts: ConstraintConflict[]; remedies: string[]; note: string } | null {
+  const step = stores.storyboard.get().storyboard.steps.find((s) => s.id === stepId);
+  if (!step) return null;
+  if (step.solve !== 'failed' && step.solve !== 'stale') return null;
+
+  const scene = stores.scene.get().summary;
+  const intent = step.intent;
+  if (!scene || !intent) {
+    return { conflicts: [], remedies: [], note: step.solveNote ?? '需要重算' };
+  }
+
+  // 用保真度模块重算一次当前状态的评估，拿到冲突清单与建议。
+  // **注意这里不改任何数据**——只是「按当前机位（或默认机位）算一遍分数」。
+  const pose = step.camera ?? viewport.getPose();
+  const contextIds = computeContextIds(step.target, scene);
+  const { report } = evaluateFidelity(
+    { intent, target: step.target, pose, effects: step.effects, scene },
+    contextIds,
+  );
+  return {
+    conflicts: report.conflicts,
+    remedies: suggestRemedies(report, scene, intent),
+    note: step.solveNote ?? '需要重算',
   };
-  function block(name: string, size: [number, number, number], pos: [number, number, number], material: THREE.Material) {
-    const mesh = new THREE.Mesh(new THREE.BoxGeometry(...size), material); mesh.name = name; mesh.position.set(...pos); building.add(mesh); return mesh;
+}
+
+// ── 5. 模型加载 ─────────────────────────────────────────────────
+
+/** 注册一棵模型树并把所有下游状态刷新到「新模型」的状态。 */
+function adoptModel(root: THREE.Object3D, prefix: string, label: string, keepOrigin: boolean): void {
+  viewport.frame(root, keepOrigin);
+  const model = registerModel(root, prefix, label, [viewport.ground]);
+  effects.attach(model);
+  picker.attach(model, effects);
+  recorder.attach(model);
+
+  stores.model.set(() => ({
+    prefix: model.prefix,
+    label,
+    componentCount: model.components.length,
+    nameWarningCount: model.nameReport.warnings.length,
+    duplicateCount: model.nameReport.duplicates.length,
+    ready: true,
+  }));
+
+  syncSceneSummary();
+  byId<HTMLElement>('scene-subtitle').textContent = label;
+  byId<HTMLElement>('object-count').textContent = `构件 ${model.components.length}`;
+  byId<HTMLElement>('model-status').textContent =
+    `${model.components.length} 个构件 · 语义告警 ${model.nameReport.warnings.length}`;
+  loading.classList.add('hidden');
+
+  selectComponent(null);
+
+  // 加载报告里有重复构件名时**必须让用户知道**：重复名意味着 ID 会冲突，
+  // 也就是「重定向时可能换错构件」（规范 §7.4 把重复列为阻断项）
+  if (model.nameReport.duplicates.length > 0) {
+    toast(`模型里有 ${model.nameReport.duplicates.length} 个重复构件名，稳定 ID 会冲突，请修正命名`);
   }
-  block('建筑基座', [8.8, 0.35, 6.8], [0, 0.18, 0], mats.base);
-  block('一层主体', [6.8, 2.7, 4.8], [0, 1.7, 0], mats.wall);
-  block('二层主体', [5.8, 2.4, 4.2], [0, 4.25, 0], mats.wall);
-  block('屋顶', [6.5, 0.3, 4.8], [0, 5.6, 0], mats.roof);
-  block('入口门廊顶板', [2.8, 0.18, 1.5], [0, 2.8, 3.0], mats.accent);
-  for (const x of [-1.1, 1.1]) block(`门廊柱 ${x < 0 ? '左' : '右'}`, [0.18, 2.45, 0.18], [x, 1.48, 3.45], mats.column);
-  block('入口门', [1.15, 2.05, 0.12], [0, 1.25, 2.43], mats.roof);
-  // Front-facing windows on both storeys.
-  for (const x of [-2.35, -0.85, 0.85, 2.35]) {
-    block(`一层窗 ${x}`, [0.78, 1.15, 0.08], [x, 1.72, 2.44], mats.glass);
-    block(`二层窗 ${x}`, [0.8, 1.0, 0.08], [x * 0.82, 4.25, 2.14], mats.glass);
+
+  // 分镜与模型兼容性检查（支撑 C-3）
+  const compatibility = cmd.checkCompatibility(ctx);
+  if (!compatibility.compatible) {
+    byId<HTMLElement>('dirty-indicator').textContent = '⚠ 当前分镜与模型不匹配';
+    toast(compatibility.reason);
+  } else {
+    byId<HTMLElement>('dirty-indicator').textContent = '';
   }
-  // Side windows and simple vertical facade fins.
-  for (const z of [-1.25, 0.2, 1.35]) block(`侧窗 ${z}`, [0.08, 1.1, 0.72], [3.42, 1.7, z], mats.glass);
-  for (const x of [-2.6, 2.6]) block(`立面装饰线 ${x}`, [0.1, 2.45, 0.12], [x, 4.25, 2.13], mats.accent);
-  return building;
+
+  refreshAll();
 }
-function onResize() {
-  const width = viewport.clientWidth, height = viewport.clientHeight;
-  camera.aspect = width / Math.max(height, 1); camera.updateProjectionMatrix(); renderer.setSize(width, height);
+
+function syncSceneSummary(): void {
+  const model = picker.model;
+  if (!model) {
+    stores.scene.set(() => ({ summary: null }));
+    return;
+  }
+  stores.scene.set(() => ({ summary: toSceneSummary(model, viewport.aspect) }));
+  stores.camera.set((s) => ({ ...s, aspect: viewport.aspect, pose: viewport.getPose() }));
 }
-function onPointerDown(event: PointerEvent) {
-  const rect = renderer.domElement.getBoundingClientRect();
-  pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-  pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-  raycaster.setFromCamera(pointer, camera);
-  const hits = raycaster.intersectObjects(selectable.filter(object => object.visible), false);
-  if (hits.length) selectObject(hits[0].object);
-  else selectObject(null);
+
+function loadGeneratedHall(): void {
+  fetch(`${import.meta.env.BASE_URL}models/demohall.geometry.json`)
+    .then((response) => {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.json() as Promise<GeometryFile>;
+    })
+    .then((file) => {
+      adoptModel(
+        buildModelGroup(file),
+        file.prefix,
+        `程序生成厅堂 · ${file.components.length} 个构件 · 构件名遵循命名规范`,
+        true,
+      );
+      toast('已加载程序生成的厅堂模型');
+    })
+    .catch((err) => {
+      console.error(err);
+      loading.classList.add('hidden');
+      byId<HTMLElement>('model-status').textContent = '模型载入失败';
+      toast('未找到 demohall.geometry.json，请先运行 npm run gen:model');
+    });
 }
-renderer.domElement.addEventListener('pointerdown', onPointerDown);
-document.querySelector('#reset-camera')!.addEventListener('click', () => {
-  if (!root) return;
-  const box = new THREE.Box3().setFromObject(root); const size = box.getSize(new THREE.Vector3()); const maxDim = Math.max(size.x, size.y, size.z, 2);
-  controls.target.set(0, Math.max(0.8, size.y * 0.42), 0); camera.position.set(maxDim * 1.35, maxDim * 0.95, maxDim * 1.55); controls.update(); toastMessage('已重置相机视角');
+
+function loadExternalModel(file: File): void {
+  const url = URL.createObjectURL(file);
+  loading.classList.remove('hidden');
+  loading.textContent = `正在加载 ${file.name}…`;
+  const prefix = modelPrefixFromFileName(file.name);
+
+  new GLTFLoader().load(
+    url,
+    (gltf) => {
+      adoptModel(
+        gltf.scene,
+        prefix,
+        `${file.name} · 外部模型（构件名多半不合规范，语义会显示为 unknown）`,
+        false,
+      );
+      URL.revokeObjectURL(url);
+      toast('模型加载成功');
+    },
+    undefined,
+    (error) => {
+      console.error(error);
+      loading.classList.add('hidden');
+      toast('模型加载失败，请检查文件格式');
+      URL.revokeObjectURL(url);
+    },
+  );
+}
+
+/** 步骤统计（存档区显示用）。放在这里而不是 L3，因为它只是界面的措辞。 */
+function derivedStats(steps: ReadonlyArray<{ solve: string }>): {
+  total: number;
+  solved: number;
+  stale: number;
+  failed: number;
+} {
+  const stats = { total: steps.length, solved: 0, stale: 0, failed: 0 };
+  for (const step of steps) {
+    if (step.solve === 'solved') stats.solved += 1;
+    else if (step.solve === 'stale') stats.stale += 1;
+    else if (step.solve === 'failed') stats.failed += 1;
+  }
+  return stats;
+}
+
+/**
+ * 载入一份分镜，并**检查它与当前模型的兼容性**。
+ *
+ * 兼容性检查放在这里而不是 IO 层，因为只有这里同时拿得到「分镜」与「当前模型」
+ * （概要设计 §3.4 / C-3）。不兼容时不拒绝加载——让用户看到内容、知道哪里对不上，
+ * 比打不开有用——但必须明确提示。
+ */
+function adoptStoryboard(board: Storyboard): void {
+  const previous = stores.storyboard.get();
+  stores.storyboard.set(() => ({
+    ...previous,
+    storyboard: board,
+    activeStepId: board.steps[0]?.id ?? null,
+    dirty: false,
+  }));
+  const compatibility = cmd.checkCompatibility(ctx);
+  if (!compatibility.compatible) {
+    byId<HTMLElement>('dirty-indicator').textContent = '⚠ 当前分镜与模型不匹配';
+    toast(compatibility.reason);
+  }
+  // 载入后把视口移到第一个步骤的机位，用户能立刻看到内容
+  const first = board.steps.find((step) => step.camera);
+  if (first?.camera) {
+    viewport.setPose(first.camera);
+    effects.apply(first.effects);
+  }
+  refreshAll();
+}
+
+// ── 6. 界面刷新 ─────────────────────────────────────────────────
+
+function refreshAll(): void {
+  componentPanel.render();
+  stepPanel.render();
+  inspector.render();
+  timeline.render();
+
+  const component = stores.selection.get().selectedId ? picker.byId(stores.selection.get().selectedId!) : null;
+  const entry = component
+    ? picker.model?.nameReport.entries.find((e) => e.nodeName === component.nodeName)
+    : undefined;
+  semanticsView.update(component, component?.id ?? '', entry?.warnings ?? []);
+
+  inspector.setDemoCount(recorder.recording ? `已记录 ${recorder.actionCount} 次操作` : '');
+  inspector.setSaveInfo(inspectorDeps.saveInfo());
+}
+
+// ── 7. 事件绑定 ─────────────────────────────────────────────────
+
+viewport.domElement.addEventListener('pointerdown', (event) => {
+  const hit = picker.pick(event, viewport.domElement, viewport.camera);
+  pickComponent(hit?.id ?? null);
 });
-highlightButton.addEventListener('click', () => {
-  if (!selected) return;
-  const enable = !highlighted.has(selected); setHighlight(selected, enable); highlightButton.classList.toggle('is-active', enable); rebuildComponentList(); toastMessage(enable ? '已高亮当前构件' : '已取消高亮');
+
+byId<HTMLButtonElement>('reset-camera').addEventListener('click', () => {
+  const model = picker.model;
+  if (!model) return;
+  viewport.resetView(model.root);
+  syncSceneSummary();
+  toast('已重置相机视角');
 });
-opacitySlider.addEventListener('input', () => {
-  if (!selected) return;
-  const opacity = Number(opacitySlider.value) / 100; opacityValue.textContent = `${Math.round(opacity * 100)}%`;
-  materialsOf(selected).forEach(material => { material.transparent = opacity < 1; material.opacity = opacity; material.depthWrite = opacity >= 1; material.needsUpdate = true; });
-});
-visibilityButton.addEventListener('click', () => {
-  if (!selected) return;
-  selected.visible = !selected.visible; const hidden = !selected.visible;
-  selectedType.textContent = `${(selected as THREE.Mesh).geometry?.type ?? '3D Object'} · ${hidden ? '已隐藏' : '可见'}`;
-  visibilityButton.innerHTML = hidden ? '<span>◉</span> 显示构件' : '<span>◉</span> 隐藏构件';
-  rebuildComponentList(); toastMessage(hidden ? '构件已隐藏，可在列表中恢复' : '构件已显示');
-});
-restoreButton.addEventListener('click', () => { if (!selected) return; restoreObject(selected); selectObject(selected); toastMessage('已恢复构件默认状态'); });
-modelFile.addEventListener('change', () => {
-  const file = modelFile.files?.[0]; if (!file) return;
-  const url = URL.createObjectURL(file); loading.classList.remove('hidden'); loading.textContent = `正在加载 ${file.name}…`;
-  new GLTFLoader().load(url, gltf => {
-    registerRoot(gltf.scene, file.name); URL.revokeObjectURL(url); toastMessage('模型加载成功');
-  }, undefined, error => {
-    console.error(error); loading.classList.add('hidden'); toastMessage('模型加载失败，请检查文件格式或浏览器控制台'); URL.revokeObjectURL(url);
+
+// 标签页切换
+document.querySelectorAll<HTMLButtonElement>('.tab-button').forEach((button) => {
+  button.addEventListener('click', () => {
+    const tab = button.dataset.tab!;
+    document.querySelectorAll<HTMLButtonElement>('.tab-button').forEach((b) =>
+      b.classList.toggle('active', b === button),
+    );
+    document.querySelectorAll<HTMLElement>('.tab-panel').forEach((panel) => {
+      panel.hidden = panel.dataset.panel !== tab;
+    });
+    // 切到构件页时刷一次列表：期间可能发生了求解/预览，导致「步骤目标」标记变化
+    refreshAll();
   });
-  modelFile.value = '';
 });
-window.addEventListener('resize', onResize);
-registerRoot(createDemoBuilding(), '程序生成示例建筑 · 可替换为 GLB');
-onResize();
-function animate() { requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera); }
+
+window.addEventListener('resize', () => {
+  viewport.resize();
+  syncSceneSummary();
+});
+
+// 渲染循环
+function animate(): void {
+  requestAnimationFrame(animate);
+  // 录制中持续采样相机（M5 内部有抽稀，不会逐帧堆积）
+  if (recorder.recording) {
+    recorder.sampleCamera(viewport.getPose());
+    stores.demo.set((s) =>
+      s.actionCount === recorder.actionCount ? s : { ...s, actionCount: recorder.actionCount },
+    );
+  }
+  viewport.render();
+}
+
+// ── 8. 面板挂载 ─────────────────────────────────────────────────
+
+fill(byId('panel-steps'), [stepPanel.root]);
+fill(byId('panel-components'), [semanticsView.root, componentPanel.root]);
+fill(byId('panel-model'), [inspector.root]);
+fill(byId('timeline-host'), [timeline.root]);
+document.body.append(intentDialog.root);
+
+// ── 9. 订阅（L4 的 Store 是唯一真源，L5 只订阅）───────────────────
+
+stores.storyboard.subscribe((state, prev) => {
+  if (state.storyboard !== prev.storyboard) {
+    byId<HTMLElement>('dirty-indicator').textContent = state.storyboard.steps.some((s) => s.solve === 'stale')
+      ? '⚠ 有步骤待重算'
+      : '';
+  }
+});
+stores.playback.subscribe(() => timeline.render());
+stores.selection.subscribe(() => refreshAll());
+
+// ── 10. 启动 ────────────────────────────────────────────────────
+
+// `currentLabelOf` 在面板创建时就被捕获（闭包），所以必须先它一步设好真实实现
+currentLabelOf = (id) => picker.byId(id)?.displayName ?? id;
+
+viewport.resize();
 animate();
+loadGeneratedHall();
+
+// 暴露给控制台，方便答辩时现场演示（`__arch` 是刻意的调试入口，不是 API）
+Object.assign(window, { __arch: { stores, ctx, registry, picker, effects, viewport, recorder, cmd } });
+// 说明：示例分镜**不自动加载**——自动载入会覆盖用户正在编的内容。
+// 入口在「分镜存档」区的「载入示例分镜」按钮上（见 inspector 的 onLoadExample）。
+void deriveSemantics;
+void parseStoryboard;

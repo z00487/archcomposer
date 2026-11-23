@@ -1,0 +1,3102 @@
+{
+  "schemaVersion": 1,
+  "prefix": "demohall",
+  "unit": "m",
+  "params": {
+    "bayCount": 3,
+    "centerBayWidth": 4.2,
+    "sideBayWidth": 3.4,
+    "depth": 6,
+    "columnHeight": 4,
+    "columnRadius": 0.18,
+    "columnBaseRadius": 0.26,
+    "columnBaseHeight": 0.16,
+    "dougongHeight": 0.85,
+    "dougongWidth": 0.72,
+    "dougongDepth": 0.72,
+    "beamWidth": 0.24,
+    "beamHeight": 0.38,
+    "purlinRadius": 0.13,
+    "rafterCountPerSide": 8,
+    "rafterWidth": 0.1,
+    "rafterHeight": 0.14,
+    "roofRise": 2.6,
+    "eaveOverhang": 0.9,
+    "roofThickness": 0.22,
+    "gableThickness": 0.18,
+    "plinthHeight": 0.45,
+    "plinthMargin": 0.7
+  },
+  "bounds": {
+    "min": [
+      -6.4,
+      -0.45,
+      -3.974045901342465
+    ],
+    "max": [
+      6.4,
+      7.729999999999999,
+      3.974045901342465
+    ]
+  },
+  "components": [
+    {
+      "id": "demohall@1/plinth",
+      "nodeName": "plinth",
+      "semantics": {
+        "kind": "plinth",
+        "part": "",
+        "label": "台基"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          12.76,
+          0.45,
+          7.76
+        ]
+      },
+      "position": [
+        0,
+        -0.225,
+        0
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -6.38,
+          -0.45,
+          -3.88
+        ],
+        "max": [
+          6.38,
+          0,
+          3.88
+        ]
+      },
+      "materialKey": "stone"
+    },
+    {
+      "id": "demohall@1/column_e__01",
+      "nodeName": "column_e__01",
+      "semantics": {
+        "kind": "column",
+        "part": "e",
+        "label": "东侧柱"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.18,
+        "height": 4,
+        "radialSegments": 16,
+        "axis": "y"
+      },
+      "position": [
+        5.5,
+        2,
+        3
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          5.32,
+          0,
+          2.82
+        ],
+        "max": [
+          5.68,
+          4,
+          3.18
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/columnbase_e__01",
+      "nodeName": "columnbase_e__01",
+      "semantics": {
+        "kind": "columnbase",
+        "part": "e",
+        "label": "东侧柱础"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.26,
+        "height": 0.16,
+        "radialSegments": 16,
+        "axis": "y"
+      },
+      "position": [
+        5.5,
+        0.08,
+        3
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          5.24,
+          0,
+          2.74
+        ],
+        "max": [
+          5.76,
+          0.16,
+          3.26
+        ]
+      },
+      "materialKey": "stone"
+    },
+    {
+      "id": "demohall@1/column_e__02",
+      "nodeName": "column_e__02",
+      "semantics": {
+        "kind": "column",
+        "part": "e",
+        "label": "东侧柱"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.18,
+        "height": 4,
+        "radialSegments": 16,
+        "axis": "y"
+      },
+      "position": [
+        5.5,
+        2,
+        -3
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          5.32,
+          0,
+          -3.18
+        ],
+        "max": [
+          5.68,
+          4,
+          -2.82
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/columnbase_e__02",
+      "nodeName": "columnbase_e__02",
+      "semantics": {
+        "kind": "columnbase",
+        "part": "e",
+        "label": "东侧柱础"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.26,
+        "height": 0.16,
+        "radialSegments": 16,
+        "axis": "y"
+      },
+      "position": [
+        5.5,
+        0.08,
+        -3
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          5.24,
+          0,
+          -3.26
+        ],
+        "max": [
+          5.76,
+          0.16,
+          -2.74
+        ]
+      },
+      "materialKey": "stone"
+    },
+    {
+      "id": "demohall@1/column_c__01",
+      "nodeName": "column_c__01",
+      "semantics": {
+        "kind": "column",
+        "part": "c",
+        "label": "中央柱"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.18,
+        "height": 4,
+        "radialSegments": 16,
+        "axis": "y"
+      },
+      "position": [
+        2.1,
+        2,
+        3
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          1.9200000000000002,
+          0,
+          2.82
+        ],
+        "max": [
+          2.2800000000000002,
+          4,
+          3.18
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/columnbase_c__01",
+      "nodeName": "columnbase_c__01",
+      "semantics": {
+        "kind": "columnbase",
+        "part": "c",
+        "label": "中央柱础"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.26,
+        "height": 0.16,
+        "radialSegments": 16,
+        "axis": "y"
+      },
+      "position": [
+        2.1,
+        0.08,
+        3
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          1.84,
+          0,
+          2.74
+        ],
+        "max": [
+          2.3600000000000003,
+          0.16,
+          3.26
+        ]
+      },
+      "materialKey": "stone"
+    },
+    {
+      "id": "demohall@1/column_c__02",
+      "nodeName": "column_c__02",
+      "semantics": {
+        "kind": "column",
+        "part": "c",
+        "label": "中央柱"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.18,
+        "height": 4,
+        "radialSegments": 16,
+        "axis": "y"
+      },
+      "position": [
+        2.1,
+        2,
+        -3
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          1.9200000000000002,
+          0,
+          -3.18
+        ],
+        "max": [
+          2.2800000000000002,
+          4,
+          -2.82
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/columnbase_c__02",
+      "nodeName": "columnbase_c__02",
+      "semantics": {
+        "kind": "columnbase",
+        "part": "c",
+        "label": "中央柱础"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.26,
+        "height": 0.16,
+        "radialSegments": 16,
+        "axis": "y"
+      },
+      "position": [
+        2.1,
+        0.08,
+        -3
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          1.84,
+          0,
+          -3.26
+        ],
+        "max": [
+          2.3600000000000003,
+          0.16,
+          -2.74
+        ]
+      },
+      "materialKey": "stone"
+    },
+    {
+      "id": "demohall@1/column_c__03",
+      "nodeName": "column_c__03",
+      "semantics": {
+        "kind": "column",
+        "part": "c",
+        "label": "中央柱"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.18,
+        "height": 4,
+        "radialSegments": 16,
+        "axis": "y"
+      },
+      "position": [
+        -2.1,
+        2,
+        3
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -2.2800000000000002,
+          0,
+          2.82
+        ],
+        "max": [
+          -1.9200000000000002,
+          4,
+          3.18
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/columnbase_c__03",
+      "nodeName": "columnbase_c__03",
+      "semantics": {
+        "kind": "columnbase",
+        "part": "c",
+        "label": "中央柱础"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.26,
+        "height": 0.16,
+        "radialSegments": 16,
+        "axis": "y"
+      },
+      "position": [
+        -2.1,
+        0.08,
+        3
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -2.3600000000000003,
+          0,
+          2.74
+        ],
+        "max": [
+          -1.84,
+          0.16,
+          3.26
+        ]
+      },
+      "materialKey": "stone"
+    },
+    {
+      "id": "demohall@1/column_c__04",
+      "nodeName": "column_c__04",
+      "semantics": {
+        "kind": "column",
+        "part": "c",
+        "label": "中央柱"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.18,
+        "height": 4,
+        "radialSegments": 16,
+        "axis": "y"
+      },
+      "position": [
+        -2.1,
+        2,
+        -3
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -2.2800000000000002,
+          0,
+          -3.18
+        ],
+        "max": [
+          -1.9200000000000002,
+          4,
+          -2.82
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/columnbase_c__04",
+      "nodeName": "columnbase_c__04",
+      "semantics": {
+        "kind": "columnbase",
+        "part": "c",
+        "label": "中央柱础"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.26,
+        "height": 0.16,
+        "radialSegments": 16,
+        "axis": "y"
+      },
+      "position": [
+        -2.1,
+        0.08,
+        -3
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -2.3600000000000003,
+          0,
+          -3.26
+        ],
+        "max": [
+          -1.84,
+          0.16,
+          -2.74
+        ]
+      },
+      "materialKey": "stone"
+    },
+    {
+      "id": "demohall@1/column_w__01",
+      "nodeName": "column_w__01",
+      "semantics": {
+        "kind": "column",
+        "part": "w",
+        "label": "西侧柱"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.18,
+        "height": 4,
+        "radialSegments": 16,
+        "axis": "y"
+      },
+      "position": [
+        -5.5,
+        2,
+        3
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -5.68,
+          0,
+          2.82
+        ],
+        "max": [
+          -5.32,
+          4,
+          3.18
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/columnbase_w__01",
+      "nodeName": "columnbase_w__01",
+      "semantics": {
+        "kind": "columnbase",
+        "part": "w",
+        "label": "西侧柱础"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.26,
+        "height": 0.16,
+        "radialSegments": 16,
+        "axis": "y"
+      },
+      "position": [
+        -5.5,
+        0.08,
+        3
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -5.76,
+          0,
+          2.74
+        ],
+        "max": [
+          -5.24,
+          0.16,
+          3.26
+        ]
+      },
+      "materialKey": "stone"
+    },
+    {
+      "id": "demohall@1/column_w__02",
+      "nodeName": "column_w__02",
+      "semantics": {
+        "kind": "column",
+        "part": "w",
+        "label": "西侧柱"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.18,
+        "height": 4,
+        "radialSegments": 16,
+        "axis": "y"
+      },
+      "position": [
+        -5.5,
+        2,
+        -3
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -5.68,
+          0,
+          -3.18
+        ],
+        "max": [
+          -5.32,
+          4,
+          -2.82
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/columnbase_w__02",
+      "nodeName": "columnbase_w__02",
+      "semantics": {
+        "kind": "columnbase",
+        "part": "w",
+        "label": "西侧柱础"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.26,
+        "height": 0.16,
+        "radialSegments": 16,
+        "axis": "y"
+      },
+      "position": [
+        -5.5,
+        0.08,
+        -3
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -5.76,
+          0,
+          -3.26
+        ],
+        "max": [
+          -5.24,
+          0.16,
+          -2.74
+        ]
+      },
+      "materialKey": "stone"
+    },
+    {
+      "id": "demohall@1/dougong_se__01",
+      "nodeName": "dougong_se__01",
+      "semantics": {
+        "kind": "dougong",
+        "part": "se",
+        "label": "前檐东转角斗拱"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.72,
+          0.85,
+          0.72
+        ]
+      },
+      "position": [
+        5.5,
+        4.425,
+        3
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          5.14,
+          4,
+          2.64
+        ],
+        "max": [
+          5.86,
+          4.85,
+          3.36
+        ]
+      },
+      "materialKey": "woodDark"
+    },
+    {
+      "id": "demohall@1/dougong_sw__01",
+      "nodeName": "dougong_sw__01",
+      "semantics": {
+        "kind": "dougong",
+        "part": "sw",
+        "label": "前檐西转角斗拱"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.72,
+          0.85,
+          0.72
+        ]
+      },
+      "position": [
+        -5.5,
+        4.425,
+        3
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -5.86,
+          4,
+          2.64
+        ],
+        "max": [
+          -5.14,
+          4.85,
+          3.36
+        ]
+      },
+      "materialKey": "woodDark"
+    },
+    {
+      "id": "demohall@1/dougong_ne__01",
+      "nodeName": "dougong_ne__01",
+      "semantics": {
+        "kind": "dougong",
+        "part": "ne",
+        "label": "后檐东转角斗拱"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.72,
+          0.85,
+          0.72
+        ]
+      },
+      "position": [
+        5.5,
+        4.425,
+        -3
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          5.14,
+          4,
+          -3.36
+        ],
+        "max": [
+          5.86,
+          4.85,
+          -2.64
+        ]
+      },
+      "materialKey": "woodDark"
+    },
+    {
+      "id": "demohall@1/dougong_nw__01",
+      "nodeName": "dougong_nw__01",
+      "semantics": {
+        "kind": "dougong",
+        "part": "nw",
+        "label": "后檐西转角斗拱"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.72,
+          0.85,
+          0.72
+        ]
+      },
+      "position": [
+        -5.5,
+        4.425,
+        -3
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -5.86,
+          4,
+          -3.36
+        ],
+        "max": [
+          -5.14,
+          4.85,
+          -2.64
+        ]
+      },
+      "materialKey": "woodDark"
+    },
+    {
+      "id": "demohall@1/dougong_c_front__01",
+      "nodeName": "dougong_c_front__01",
+      "semantics": {
+        "kind": "dougong",
+        "part": "c-front",
+        "label": "中央前檐斗拱"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.72,
+          0.85,
+          0.72
+        ]
+      },
+      "position": [
+        2.1,
+        4.425,
+        3
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          1.7400000000000002,
+          4,
+          2.64
+        ],
+        "max": [
+          2.46,
+          4.85,
+          3.36
+        ]
+      },
+      "materialKey": "woodDark"
+    },
+    {
+      "id": "demohall@1/dougong_c_front__02",
+      "nodeName": "dougong_c_front__02",
+      "semantics": {
+        "kind": "dougong",
+        "part": "c-front",
+        "label": "中央前檐斗拱"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.72,
+          0.85,
+          0.72
+        ]
+      },
+      "position": [
+        -2.1,
+        4.425,
+        3
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -2.46,
+          4,
+          2.64
+        ],
+        "max": [
+          -1.7400000000000002,
+          4.85,
+          3.36
+        ]
+      },
+      "materialKey": "woodDark"
+    },
+    {
+      "id": "demohall@1/dougong_c_back__01",
+      "nodeName": "dougong_c_back__01",
+      "semantics": {
+        "kind": "dougong",
+        "part": "c-back",
+        "label": "中央后檐斗拱"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.72,
+          0.85,
+          0.72
+        ]
+      },
+      "position": [
+        2.1,
+        4.425,
+        -3
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          1.7400000000000002,
+          4,
+          -3.36
+        ],
+        "max": [
+          2.46,
+          4.85,
+          -2.64
+        ]
+      },
+      "materialKey": "woodDark"
+    },
+    {
+      "id": "demohall@1/dougong_c_back__02",
+      "nodeName": "dougong_c_back__02",
+      "semantics": {
+        "kind": "dougong",
+        "part": "c-back",
+        "label": "中央后檐斗拱"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.72,
+          0.85,
+          0.72
+        ]
+      },
+      "position": [
+        -2.1,
+        4.425,
+        -3
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -2.46,
+          4,
+          -3.36
+        ],
+        "max": [
+          -1.7400000000000002,
+          4.85,
+          -2.64
+        ]
+      },
+      "materialKey": "woodDark"
+    },
+    {
+      "id": "demohall@1/beam_w__01",
+      "nodeName": "beam_w__01",
+      "semantics": {
+        "kind": "beam",
+        "part": "w",
+        "label": "西侧梁"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.24,
+          0.38,
+          3
+        ]
+      },
+      "position": [
+        -3.8,
+        4.99,
+        1.5
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -3.92,
+          4.8,
+          0
+        ],
+        "max": [
+          -3.6799999999999997,
+          5.180000000000001,
+          3
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/beam_w__02",
+      "nodeName": "beam_w__02",
+      "semantics": {
+        "kind": "beam",
+        "part": "w",
+        "label": "西侧梁"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.24,
+          0.38,
+          3
+        ]
+      },
+      "position": [
+        -3.8,
+        4.99,
+        -1.5
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -3.92,
+          4.8,
+          -3
+        ],
+        "max": [
+          -3.6799999999999997,
+          5.180000000000001,
+          0
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/beam_c__01",
+      "nodeName": "beam_c__01",
+      "semantics": {
+        "kind": "beam",
+        "part": "c",
+        "label": "中央梁"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.24,
+          0.38,
+          3
+        ]
+      },
+      "position": [
+        0,
+        4.99,
+        1.5
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -0.12,
+          4.8,
+          0
+        ],
+        "max": [
+          0.12,
+          5.180000000000001,
+          3
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/beam_c__02",
+      "nodeName": "beam_c__02",
+      "semantics": {
+        "kind": "beam",
+        "part": "c",
+        "label": "中央梁"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.24,
+          0.38,
+          3
+        ]
+      },
+      "position": [
+        0,
+        4.99,
+        -1.5
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -0.12,
+          4.8,
+          -3
+        ],
+        "max": [
+          0.12,
+          5.180000000000001,
+          0
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/beam_e__01",
+      "nodeName": "beam_e__01",
+      "semantics": {
+        "kind": "beam",
+        "part": "e",
+        "label": "东侧梁"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.24,
+          0.38,
+          3
+        ]
+      },
+      "position": [
+        3.8,
+        4.99,
+        1.5
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          3.6799999999999997,
+          4.8,
+          0
+        ],
+        "max": [
+          3.92,
+          5.180000000000001,
+          3
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/beam_e__02",
+      "nodeName": "beam_e__02",
+      "semantics": {
+        "kind": "beam",
+        "part": "e",
+        "label": "东侧梁"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.24,
+          0.38,
+          3
+        ]
+      },
+      "position": [
+        3.8,
+        4.99,
+        -1.5
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          3.6799999999999997,
+          4.8,
+          -3
+        ],
+        "max": [
+          3.92,
+          5.180000000000001,
+          0
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/purlin_e_front_1",
+      "nodeName": "purlin_e_front_1",
+      "semantics": {
+        "kind": "purlin",
+        "part": "e-front-1",
+        "label": "东侧前檐檐檩"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.13,
+        "height": 3.4,
+        "radialSegments": 12,
+        "axis": "x"
+      },
+      "position": [
+        0,
+        3.6189858494506213,
+        3.6442050680896685
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -1.7,
+          3.4889858494506214,
+          3.5142050680896686
+        ],
+        "max": [
+          1.7,
+          3.748985849450621,
+          3.7742050680896684
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/purlin_e_front_2",
+      "nodeName": "purlin_e_front_2",
+      "semantics": {
+        "kind": "purlin",
+        "part": "e-front-2",
+        "label": "东侧前檐金檩"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.13,
+        "height": 3.4,
+        "radialSegments": 12,
+        "axis": "x"
+      },
+      "position": [
+        0,
+        5.393985849450622,
+        1.6942050680896683
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -1.7,
+          5.263985849450622,
+          1.5642050680896684
+        ],
+        "max": [
+          1.7,
+          5.5239858494506215,
+          1.8242050680896682
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/purlin_e_front_3",
+      "nodeName": "purlin_e_front_3",
+      "semantics": {
+        "kind": "purlin",
+        "part": "e-front-3",
+        "label": "东侧前檐脊檩"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.13,
+        "height": 3.4,
+        "radialSegments": 12,
+        "axis": "x"
+      },
+      "position": [
+        0,
+        7.168985849450621,
+        -0.25579493191033165
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -1.7,
+          7.038985849450621,
+          -0.38579493191033165
+        ],
+        "max": [
+          1.7,
+          7.298985849450621,
+          -0.12579493191033164
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/purlin_e_back_1",
+      "nodeName": "purlin_e_back_1",
+      "semantics": {
+        "kind": "purlin",
+        "part": "e-back-1",
+        "label": "东侧后檐檐檩"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.13,
+        "height": 3.4,
+        "radialSegments": 12,
+        "axis": "x"
+      },
+      "position": [
+        0,
+        3.6189858494506213,
+        -3.6442050680896685
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -1.7,
+          3.4889858494506214,
+          -3.7742050680896684
+        ],
+        "max": [
+          1.7,
+          3.748985849450621,
+          -3.5142050680896686
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/purlin_e_back_2",
+      "nodeName": "purlin_e_back_2",
+      "semantics": {
+        "kind": "purlin",
+        "part": "e-back-2",
+        "label": "东侧后檐金檩"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.13,
+        "height": 3.4,
+        "radialSegments": 12,
+        "axis": "x"
+      },
+      "position": [
+        0,
+        5.393985849450622,
+        -1.6942050680896683
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -1.7,
+          5.263985849450622,
+          -1.8242050680896682
+        ],
+        "max": [
+          1.7,
+          5.5239858494506215,
+          -1.5642050680896684
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/purlin_e_back_3",
+      "nodeName": "purlin_e_back_3",
+      "semantics": {
+        "kind": "purlin",
+        "part": "e-back-3",
+        "label": "东侧后檐脊檩"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.13,
+        "height": 3.4,
+        "radialSegments": 12,
+        "axis": "x"
+      },
+      "position": [
+        0,
+        7.168985849450621,
+        0.25579493191033165
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -1.7,
+          7.038985849450621,
+          0.12579493191033164
+        ],
+        "max": [
+          1.7,
+          7.298985849450621,
+          0.38579493191033165
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/purlin_c_front_1",
+      "nodeName": "purlin_c_front_1",
+      "semantics": {
+        "kind": "purlin",
+        "part": "c-front-1",
+        "label": "中央前檐檐檩"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.13,
+        "height": 4.2,
+        "radialSegments": 12,
+        "axis": "x"
+      },
+      "position": [
+        0,
+        3.6189858494506213,
+        3.6442050680896685
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -2.1,
+          3.4889858494506214,
+          3.5142050680896686
+        ],
+        "max": [
+          2.1,
+          3.748985849450621,
+          3.7742050680896684
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/purlin_c_front_2",
+      "nodeName": "purlin_c_front_2",
+      "semantics": {
+        "kind": "purlin",
+        "part": "c-front-2",
+        "label": "中央前檐金檩"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.13,
+        "height": 4.2,
+        "radialSegments": 12,
+        "axis": "x"
+      },
+      "position": [
+        0,
+        5.393985849450622,
+        1.6942050680896683
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -2.1,
+          5.263985849450622,
+          1.5642050680896684
+        ],
+        "max": [
+          2.1,
+          5.5239858494506215,
+          1.8242050680896682
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/purlin_c_front_3",
+      "nodeName": "purlin_c_front_3",
+      "semantics": {
+        "kind": "purlin",
+        "part": "c-front-3",
+        "label": "中央前檐脊檩"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.13,
+        "height": 4.2,
+        "radialSegments": 12,
+        "axis": "x"
+      },
+      "position": [
+        0,
+        7.168985849450621,
+        -0.25579493191033165
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -2.1,
+          7.038985849450621,
+          -0.38579493191033165
+        ],
+        "max": [
+          2.1,
+          7.298985849450621,
+          -0.12579493191033164
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/purlin_c_back_1",
+      "nodeName": "purlin_c_back_1",
+      "semantics": {
+        "kind": "purlin",
+        "part": "c-back-1",
+        "label": "中央后檐檐檩"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.13,
+        "height": 4.2,
+        "radialSegments": 12,
+        "axis": "x"
+      },
+      "position": [
+        0,
+        3.6189858494506213,
+        -3.6442050680896685
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -2.1,
+          3.4889858494506214,
+          -3.7742050680896684
+        ],
+        "max": [
+          2.1,
+          3.748985849450621,
+          -3.5142050680896686
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/purlin_c_back_2",
+      "nodeName": "purlin_c_back_2",
+      "semantics": {
+        "kind": "purlin",
+        "part": "c-back-2",
+        "label": "中央后檐金檩"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.13,
+        "height": 4.2,
+        "radialSegments": 12,
+        "axis": "x"
+      },
+      "position": [
+        0,
+        5.393985849450622,
+        -1.6942050680896683
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -2.1,
+          5.263985849450622,
+          -1.8242050680896682
+        ],
+        "max": [
+          2.1,
+          5.5239858494506215,
+          -1.5642050680896684
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/purlin_c_back_3",
+      "nodeName": "purlin_c_back_3",
+      "semantics": {
+        "kind": "purlin",
+        "part": "c-back-3",
+        "label": "中央后檐脊檩"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.13,
+        "height": 4.2,
+        "radialSegments": 12,
+        "axis": "x"
+      },
+      "position": [
+        0,
+        7.168985849450621,
+        0.25579493191033165
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -2.1,
+          7.038985849450621,
+          0.12579493191033164
+        ],
+        "max": [
+          2.1,
+          7.298985849450621,
+          0.38579493191033165
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/purlin_w_front_1",
+      "nodeName": "purlin_w_front_1",
+      "semantics": {
+        "kind": "purlin",
+        "part": "w-front-1",
+        "label": "西侧前檐檐檩"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.13,
+        "height": 3.4,
+        "radialSegments": 12,
+        "axis": "x"
+      },
+      "position": [
+        0,
+        3.6189858494506213,
+        3.6442050680896685
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -1.7,
+          3.4889858494506214,
+          3.5142050680896686
+        ],
+        "max": [
+          1.7,
+          3.748985849450621,
+          3.7742050680896684
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/purlin_w_front_2",
+      "nodeName": "purlin_w_front_2",
+      "semantics": {
+        "kind": "purlin",
+        "part": "w-front-2",
+        "label": "西侧前檐金檩"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.13,
+        "height": 3.4,
+        "radialSegments": 12,
+        "axis": "x"
+      },
+      "position": [
+        0,
+        5.393985849450622,
+        1.6942050680896683
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -1.7,
+          5.263985849450622,
+          1.5642050680896684
+        ],
+        "max": [
+          1.7,
+          5.5239858494506215,
+          1.8242050680896682
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/purlin_w_front_3",
+      "nodeName": "purlin_w_front_3",
+      "semantics": {
+        "kind": "purlin",
+        "part": "w-front-3",
+        "label": "西侧前檐脊檩"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.13,
+        "height": 3.4,
+        "radialSegments": 12,
+        "axis": "x"
+      },
+      "position": [
+        0,
+        7.168985849450621,
+        -0.25579493191033165
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -1.7,
+          7.038985849450621,
+          -0.38579493191033165
+        ],
+        "max": [
+          1.7,
+          7.298985849450621,
+          -0.12579493191033164
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/purlin_w_back_1",
+      "nodeName": "purlin_w_back_1",
+      "semantics": {
+        "kind": "purlin",
+        "part": "w-back-1",
+        "label": "西侧后檐檐檩"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.13,
+        "height": 3.4,
+        "radialSegments": 12,
+        "axis": "x"
+      },
+      "position": [
+        0,
+        3.6189858494506213,
+        -3.6442050680896685
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -1.7,
+          3.4889858494506214,
+          -3.7742050680896684
+        ],
+        "max": [
+          1.7,
+          3.748985849450621,
+          -3.5142050680896686
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/purlin_w_back_2",
+      "nodeName": "purlin_w_back_2",
+      "semantics": {
+        "kind": "purlin",
+        "part": "w-back-2",
+        "label": "西侧后檐金檩"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.13,
+        "height": 3.4,
+        "radialSegments": 12,
+        "axis": "x"
+      },
+      "position": [
+        0,
+        5.393985849450622,
+        -1.6942050680896683
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -1.7,
+          5.263985849450622,
+          -1.8242050680896682
+        ],
+        "max": [
+          1.7,
+          5.5239858494506215,
+          -1.5642050680896684
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/purlin_w_back_3",
+      "nodeName": "purlin_w_back_3",
+      "semantics": {
+        "kind": "purlin",
+        "part": "w-back-3",
+        "label": "西侧后檐脊檩"
+      },
+      "shape": {
+        "form": "cylinder",
+        "radius": 0.13,
+        "height": 3.4,
+        "radialSegments": 12,
+        "axis": "x"
+      },
+      "position": [
+        0,
+        7.168985849450621,
+        0.25579493191033165
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -1.7,
+          7.038985849450621,
+          0.12579493191033164
+        ],
+        "max": [
+          1.7,
+          7.298985849450621,
+          0.38579493191033165
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/rafter_e_front__01",
+      "nodeName": "rafter_e_front__01",
+      "semantics": {
+        "kind": "rafter",
+        "part": "e-front",
+        "label": "东侧前檐椽"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.1,
+          0.14,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        2.3125,
+        5.541888033950294,
+        1.828833979621422
+      ],
+      "rotX": 0.7384528151360407,
+      "aabb": {
+        "min": [
+          2.2625,
+          3.715122269375409,
+          -0.16828613941469195
+        ],
+        "max": [
+          2.3625,
+          7.368653798525179,
+          3.8259540986575358
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/rafter_e_front__02",
+      "nodeName": "rafter_e_front__02",
+      "semantics": {
+        "kind": "rafter",
+        "part": "e-front",
+        "label": "东侧前檐椽"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.1,
+          0.14,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        2.7375,
+        5.541888033950294,
+        1.828833979621422
+      ],
+      "rotX": 0.7384528151360407,
+      "aabb": {
+        "min": [
+          2.6875,
+          3.715122269375409,
+          -0.16828613941469195
+        ],
+        "max": [
+          2.7874999999999996,
+          7.368653798525179,
+          3.8259540986575358
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/rafter_e_front__03",
+      "nodeName": "rafter_e_front__03",
+      "semantics": {
+        "kind": "rafter",
+        "part": "e-front",
+        "label": "东侧前檐椽"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.1,
+          0.14,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        3.1625,
+        5.541888033950294,
+        1.828833979621422
+      ],
+      "rotX": 0.7384528151360407,
+      "aabb": {
+        "min": [
+          3.1125000000000003,
+          3.715122269375409,
+          -0.16828613941469195
+        ],
+        "max": [
+          3.2125,
+          7.368653798525179,
+          3.8259540986575358
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/rafter_e_front__04",
+      "nodeName": "rafter_e_front__04",
+      "semantics": {
+        "kind": "rafter",
+        "part": "e-front",
+        "label": "东侧前檐椽"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.1,
+          0.14,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        3.5875000000000004,
+        5.541888033950294,
+        1.828833979621422
+      ],
+      "rotX": 0.7384528151360407,
+      "aabb": {
+        "min": [
+          3.5375000000000005,
+          3.715122269375409,
+          -0.16828613941469195
+        ],
+        "max": [
+          3.6375,
+          7.368653798525179,
+          3.8259540986575358
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/rafter_e_front__05",
+      "nodeName": "rafter_e_front__05",
+      "semantics": {
+        "kind": "rafter",
+        "part": "e-front",
+        "label": "东侧前檐椽"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.1,
+          0.14,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        4.0125,
+        5.541888033950294,
+        1.828833979621422
+      ],
+      "rotX": 0.7384528151360407,
+      "aabb": {
+        "min": [
+          3.9625000000000004,
+          3.715122269375409,
+          -0.16828613941469195
+        ],
+        "max": [
+          4.0625,
+          7.368653798525179,
+          3.8259540986575358
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/rafter_e_front__06",
+      "nodeName": "rafter_e_front__06",
+      "semantics": {
+        "kind": "rafter",
+        "part": "e-front",
+        "label": "东侧前檐椽"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.1,
+          0.14,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        4.4375,
+        5.541888033950294,
+        1.828833979621422
+      ],
+      "rotX": 0.7384528151360407,
+      "aabb": {
+        "min": [
+          4.3875,
+          3.715122269375409,
+          -0.16828613941469195
+        ],
+        "max": [
+          4.4875,
+          7.368653798525179,
+          3.8259540986575358
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/rafter_e_front__07",
+      "nodeName": "rafter_e_front__07",
+      "semantics": {
+        "kind": "rafter",
+        "part": "e-front",
+        "label": "东侧前檐椽"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.1,
+          0.14,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        4.8625,
+        5.541888033950294,
+        1.828833979621422
+      ],
+      "rotX": 0.7384528151360407,
+      "aabb": {
+        "min": [
+          4.8125,
+          3.715122269375409,
+          -0.16828613941469195
+        ],
+        "max": [
+          4.9125,
+          7.368653798525179,
+          3.8259540986575358
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/rafter_e_front__08",
+      "nodeName": "rafter_e_front__08",
+      "semantics": {
+        "kind": "rafter",
+        "part": "e-front",
+        "label": "东侧前檐椽"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.1,
+          0.14,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        5.2875,
+        5.541888033950294,
+        1.828833979621422
+      ],
+      "rotX": 0.7384528151360407,
+      "aabb": {
+        "min": [
+          5.2375,
+          3.715122269375409,
+          -0.16828613941469195
+        ],
+        "max": [
+          5.3374999999999995,
+          7.368653798525179,
+          3.8259540986575358
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/rafter_w_front__01",
+      "nodeName": "rafter_w_front__01",
+      "semantics": {
+        "kind": "rafter",
+        "part": "w-front",
+        "label": "西侧前檐椽"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.1,
+          0.14,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        -5.2875,
+        5.541888033950294,
+        1.828833979621422
+      ],
+      "rotX": 0.7384528151360407,
+      "aabb": {
+        "min": [
+          -5.3374999999999995,
+          3.715122269375409,
+          -0.16828613941469195
+        ],
+        "max": [
+          -5.2375,
+          7.368653798525179,
+          3.8259540986575358
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/rafter_w_front__02",
+      "nodeName": "rafter_w_front__02",
+      "semantics": {
+        "kind": "rafter",
+        "part": "w-front",
+        "label": "西侧前檐椽"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.1,
+          0.14,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        -4.8625,
+        5.541888033950294,
+        1.828833979621422
+      ],
+      "rotX": 0.7384528151360407,
+      "aabb": {
+        "min": [
+          -4.9125,
+          3.715122269375409,
+          -0.16828613941469195
+        ],
+        "max": [
+          -4.8125,
+          7.368653798525179,
+          3.8259540986575358
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/rafter_w_front__03",
+      "nodeName": "rafter_w_front__03",
+      "semantics": {
+        "kind": "rafter",
+        "part": "w-front",
+        "label": "西侧前檐椽"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.1,
+          0.14,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        -4.4375,
+        5.541888033950294,
+        1.828833979621422
+      ],
+      "rotX": 0.7384528151360407,
+      "aabb": {
+        "min": [
+          -4.4875,
+          3.715122269375409,
+          -0.16828613941469195
+        ],
+        "max": [
+          -4.3875,
+          7.368653798525179,
+          3.8259540986575358
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/rafter_w_front__04",
+      "nodeName": "rafter_w_front__04",
+      "semantics": {
+        "kind": "rafter",
+        "part": "w-front",
+        "label": "西侧前檐椽"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.1,
+          0.14,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        -4.0125,
+        5.541888033950294,
+        1.828833979621422
+      ],
+      "rotX": 0.7384528151360407,
+      "aabb": {
+        "min": [
+          -4.0625,
+          3.715122269375409,
+          -0.16828613941469195
+        ],
+        "max": [
+          -3.9625000000000004,
+          7.368653798525179,
+          3.8259540986575358
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/rafter_w_front__05",
+      "nodeName": "rafter_w_front__05",
+      "semantics": {
+        "kind": "rafter",
+        "part": "w-front",
+        "label": "西侧前檐椽"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.1,
+          0.14,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        -3.5875000000000004,
+        5.541888033950294,
+        1.828833979621422
+      ],
+      "rotX": 0.7384528151360407,
+      "aabb": {
+        "min": [
+          -3.6375,
+          3.715122269375409,
+          -0.16828613941469195
+        ],
+        "max": [
+          -3.5375000000000005,
+          7.368653798525179,
+          3.8259540986575358
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/rafter_w_front__06",
+      "nodeName": "rafter_w_front__06",
+      "semantics": {
+        "kind": "rafter",
+        "part": "w-front",
+        "label": "西侧前檐椽"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.1,
+          0.14,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        -3.1625,
+        5.541888033950294,
+        1.828833979621422
+      ],
+      "rotX": 0.7384528151360407,
+      "aabb": {
+        "min": [
+          -3.2125,
+          3.715122269375409,
+          -0.16828613941469195
+        ],
+        "max": [
+          -3.1125000000000003,
+          7.368653798525179,
+          3.8259540986575358
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/rafter_w_front__07",
+      "nodeName": "rafter_w_front__07",
+      "semantics": {
+        "kind": "rafter",
+        "part": "w-front",
+        "label": "西侧前檐椽"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.1,
+          0.14,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        -2.7375000000000003,
+        5.541888033950294,
+        1.828833979621422
+      ],
+      "rotX": 0.7384528151360407,
+      "aabb": {
+        "min": [
+          -2.7875,
+          3.715122269375409,
+          -0.16828613941469195
+        ],
+        "max": [
+          -2.6875000000000004,
+          7.368653798525179,
+          3.8259540986575358
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/rafter_w_front__08",
+      "nodeName": "rafter_w_front__08",
+      "semantics": {
+        "kind": "rafter",
+        "part": "w-front",
+        "label": "西侧前檐椽"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.1,
+          0.14,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        -2.3125,
+        5.541888033950294,
+        1.828833979621422
+      ],
+      "rotX": 0.7384528151360407,
+      "aabb": {
+        "min": [
+          -2.3625,
+          3.715122269375409,
+          -0.16828613941469195
+        ],
+        "max": [
+          -2.2625,
+          7.368653798525179,
+          3.8259540986575358
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/rafter_e_back__01",
+      "nodeName": "rafter_e_back__01",
+      "semantics": {
+        "kind": "rafter",
+        "part": "e-back",
+        "label": "东侧后檐椽"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.1,
+          0.14,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        2.3125,
+        5.541888033950294,
+        -1.828833979621422
+      ],
+      "rotX": 2.4031398384537526,
+      "aabb": {
+        "min": [
+          2.2625,
+          3.7151222693754087,
+          -3.8259540986575358
+        ],
+        "max": [
+          2.3625,
+          7.36865379852518,
+          0.16828613941469195
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/rafter_e_back__02",
+      "nodeName": "rafter_e_back__02",
+      "semantics": {
+        "kind": "rafter",
+        "part": "e-back",
+        "label": "东侧后檐椽"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.1,
+          0.14,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        2.7375,
+        5.541888033950294,
+        -1.828833979621422
+      ],
+      "rotX": 2.4031398384537526,
+      "aabb": {
+        "min": [
+          2.6875,
+          3.7151222693754087,
+          -3.8259540986575358
+        ],
+        "max": [
+          2.7874999999999996,
+          7.36865379852518,
+          0.16828613941469195
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/rafter_e_back__03",
+      "nodeName": "rafter_e_back__03",
+      "semantics": {
+        "kind": "rafter",
+        "part": "e-back",
+        "label": "东侧后檐椽"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.1,
+          0.14,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        3.1625,
+        5.541888033950294,
+        -1.828833979621422
+      ],
+      "rotX": 2.4031398384537526,
+      "aabb": {
+        "min": [
+          3.1125000000000003,
+          3.7151222693754087,
+          -3.8259540986575358
+        ],
+        "max": [
+          3.2125,
+          7.36865379852518,
+          0.16828613941469195
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/rafter_e_back__04",
+      "nodeName": "rafter_e_back__04",
+      "semantics": {
+        "kind": "rafter",
+        "part": "e-back",
+        "label": "东侧后檐椽"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.1,
+          0.14,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        3.5875000000000004,
+        5.541888033950294,
+        -1.828833979621422
+      ],
+      "rotX": 2.4031398384537526,
+      "aabb": {
+        "min": [
+          3.5375000000000005,
+          3.7151222693754087,
+          -3.8259540986575358
+        ],
+        "max": [
+          3.6375,
+          7.36865379852518,
+          0.16828613941469195
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/rafter_e_back__05",
+      "nodeName": "rafter_e_back__05",
+      "semantics": {
+        "kind": "rafter",
+        "part": "e-back",
+        "label": "东侧后檐椽"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.1,
+          0.14,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        4.0125,
+        5.541888033950294,
+        -1.828833979621422
+      ],
+      "rotX": 2.4031398384537526,
+      "aabb": {
+        "min": [
+          3.9625000000000004,
+          3.7151222693754087,
+          -3.8259540986575358
+        ],
+        "max": [
+          4.0625,
+          7.36865379852518,
+          0.16828613941469195
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/rafter_e_back__06",
+      "nodeName": "rafter_e_back__06",
+      "semantics": {
+        "kind": "rafter",
+        "part": "e-back",
+        "label": "东侧后檐椽"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.1,
+          0.14,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        4.4375,
+        5.541888033950294,
+        -1.828833979621422
+      ],
+      "rotX": 2.4031398384537526,
+      "aabb": {
+        "min": [
+          4.3875,
+          3.7151222693754087,
+          -3.8259540986575358
+        ],
+        "max": [
+          4.4875,
+          7.36865379852518,
+          0.16828613941469195
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/rafter_e_back__07",
+      "nodeName": "rafter_e_back__07",
+      "semantics": {
+        "kind": "rafter",
+        "part": "e-back",
+        "label": "东侧后檐椽"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.1,
+          0.14,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        4.8625,
+        5.541888033950294,
+        -1.828833979621422
+      ],
+      "rotX": 2.4031398384537526,
+      "aabb": {
+        "min": [
+          4.8125,
+          3.7151222693754087,
+          -3.8259540986575358
+        ],
+        "max": [
+          4.9125,
+          7.36865379852518,
+          0.16828613941469195
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/rafter_e_back__08",
+      "nodeName": "rafter_e_back__08",
+      "semantics": {
+        "kind": "rafter",
+        "part": "e-back",
+        "label": "东侧后檐椽"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.1,
+          0.14,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        5.2875,
+        5.541888033950294,
+        -1.828833979621422
+      ],
+      "rotX": 2.4031398384537526,
+      "aabb": {
+        "min": [
+          5.2375,
+          3.7151222693754087,
+          -3.8259540986575358
+        ],
+        "max": [
+          5.3374999999999995,
+          7.36865379852518,
+          0.16828613941469195
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/rafter_w_back__01",
+      "nodeName": "rafter_w_back__01",
+      "semantics": {
+        "kind": "rafter",
+        "part": "w-back",
+        "label": "西侧后檐椽"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.1,
+          0.14,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        -5.2875,
+        5.541888033950294,
+        -1.828833979621422
+      ],
+      "rotX": 2.4031398384537526,
+      "aabb": {
+        "min": [
+          -5.3374999999999995,
+          3.7151222693754087,
+          -3.8259540986575358
+        ],
+        "max": [
+          -5.2375,
+          7.36865379852518,
+          0.16828613941469195
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/rafter_w_back__02",
+      "nodeName": "rafter_w_back__02",
+      "semantics": {
+        "kind": "rafter",
+        "part": "w-back",
+        "label": "西侧后檐椽"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.1,
+          0.14,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        -4.8625,
+        5.541888033950294,
+        -1.828833979621422
+      ],
+      "rotX": 2.4031398384537526,
+      "aabb": {
+        "min": [
+          -4.9125,
+          3.7151222693754087,
+          -3.8259540986575358
+        ],
+        "max": [
+          -4.8125,
+          7.36865379852518,
+          0.16828613941469195
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/rafter_w_back__03",
+      "nodeName": "rafter_w_back__03",
+      "semantics": {
+        "kind": "rafter",
+        "part": "w-back",
+        "label": "西侧后檐椽"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.1,
+          0.14,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        -4.4375,
+        5.541888033950294,
+        -1.828833979621422
+      ],
+      "rotX": 2.4031398384537526,
+      "aabb": {
+        "min": [
+          -4.4875,
+          3.7151222693754087,
+          -3.8259540986575358
+        ],
+        "max": [
+          -4.3875,
+          7.36865379852518,
+          0.16828613941469195
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/rafter_w_back__04",
+      "nodeName": "rafter_w_back__04",
+      "semantics": {
+        "kind": "rafter",
+        "part": "w-back",
+        "label": "西侧后檐椽"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.1,
+          0.14,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        -4.0125,
+        5.541888033950294,
+        -1.828833979621422
+      ],
+      "rotX": 2.4031398384537526,
+      "aabb": {
+        "min": [
+          -4.0625,
+          3.7151222693754087,
+          -3.8259540986575358
+        ],
+        "max": [
+          -3.9625000000000004,
+          7.36865379852518,
+          0.16828613941469195
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/rafter_w_back__05",
+      "nodeName": "rafter_w_back__05",
+      "semantics": {
+        "kind": "rafter",
+        "part": "w-back",
+        "label": "西侧后檐椽"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.1,
+          0.14,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        -3.5875000000000004,
+        5.541888033950294,
+        -1.828833979621422
+      ],
+      "rotX": 2.4031398384537526,
+      "aabb": {
+        "min": [
+          -3.6375,
+          3.7151222693754087,
+          -3.8259540986575358
+        ],
+        "max": [
+          -3.5375000000000005,
+          7.36865379852518,
+          0.16828613941469195
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/rafter_w_back__06",
+      "nodeName": "rafter_w_back__06",
+      "semantics": {
+        "kind": "rafter",
+        "part": "w-back",
+        "label": "西侧后檐椽"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.1,
+          0.14,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        -3.1625,
+        5.541888033950294,
+        -1.828833979621422
+      ],
+      "rotX": 2.4031398384537526,
+      "aabb": {
+        "min": [
+          -3.2125,
+          3.7151222693754087,
+          -3.8259540986575358
+        ],
+        "max": [
+          -3.1125000000000003,
+          7.36865379852518,
+          0.16828613941469195
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/rafter_w_back__07",
+      "nodeName": "rafter_w_back__07",
+      "semantics": {
+        "kind": "rafter",
+        "part": "w-back",
+        "label": "西侧后檐椽"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.1,
+          0.14,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        -2.7375000000000003,
+        5.541888033950294,
+        -1.828833979621422
+      ],
+      "rotX": 2.4031398384537526,
+      "aabb": {
+        "min": [
+          -2.7875,
+          3.7151222693754087,
+          -3.8259540986575358
+        ],
+        "max": [
+          -2.6875000000000004,
+          7.36865379852518,
+          0.16828613941469195
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/rafter_w_back__08",
+      "nodeName": "rafter_w_back__08",
+      "semantics": {
+        "kind": "rafter",
+        "part": "w-back",
+        "label": "西侧后檐椽"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          0.1,
+          0.14,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        -2.3125,
+        5.541888033950294,
+        -1.828833979621422
+      ],
+      "rotX": 2.4031398384537526,
+      "aabb": {
+        "min": [
+          -2.3625,
+          3.7151222693754087,
+          -3.8259540986575358
+        ],
+        "max": [
+          -2.2625,
+          7.36865379852518,
+          0.16828613941469195
+        ]
+      },
+      "materialKey": "wood"
+    },
+    {
+      "id": "demohall@1/ridge",
+      "nodeName": "ridge",
+      "semantics": {
+        "kind": "ridge",
+        "part": "",
+        "label": "正脊"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          12.8,
+          0.28,
+          0.36
+        ]
+      },
+      "position": [
+        0,
+        7.589999999999999,
+        0
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -6.4,
+          7.449999999999999,
+          -0.18
+        ],
+        "max": [
+          6.4,
+          7.729999999999999,
+          0.18
+        ]
+      },
+      "materialKey": "ridge"
+    },
+    {
+      "id": "demohall@1/roof_front",
+      "nodeName": "roof_front",
+      "semantics": {
+        "kind": "roof",
+        "part": "front",
+        "label": "前檐屋面"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          12.8,
+          0.22,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        0,
+        5.675,
+        1.95
+      ],
+      "rotX": 0.7384528151360407,
+      "aabb": {
+        "min": [
+          -6.4,
+          3.8186537985251796,
+          -0.0740459013424648
+        ],
+        "max": [
+          6.4,
+          7.53134620147482,
+          3.974045901342465
+        ]
+      },
+      "materialKey": "roofTile"
+    },
+    {
+      "id": "demohall@1/roof_back",
+      "nodeName": "roof_back",
+      "semantics": {
+        "kind": "roof",
+        "part": "back",
+        "label": "后檐屋面"
+      },
+      "shape": {
+        "form": "box",
+        "size": [
+          12.8,
+          0.22,
+          5.273755777432247
+        ]
+      },
+      "position": [
+        0,
+        5.675,
+        -1.95
+      ],
+      "rotX": 2.4031398384537526,
+      "aabb": {
+        "min": [
+          -6.4,
+          3.8186537985251796,
+          -3.974045901342465
+        ],
+        "max": [
+          6.4,
+          7.53134620147482,
+          0.0740459013424648
+        ]
+      },
+      "materialKey": "roofTile"
+    },
+    {
+      "id": "demohall@1/gable_e",
+      "nodeName": "gable_e",
+      "semantics": {
+        "kind": "gable",
+        "part": "e",
+        "label": "东侧山墙"
+      },
+      "shape": {
+        "form": "prism",
+        "base": 6,
+        "height": 3.4499999999999993,
+        "thickness": 0.18
+      },
+      "position": [
+        5.5,
+        5.725,
+        0
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          5.41,
+          4,
+          -3
+        ],
+        "max": [
+          5.59,
+          7.449999999999999,
+          3
+        ]
+      },
+      "materialKey": "wall"
+    },
+    {
+      "id": "demohall@1/gable_w",
+      "nodeName": "gable_w",
+      "semantics": {
+        "kind": "gable",
+        "part": "w",
+        "label": "西侧山墙"
+      },
+      "shape": {
+        "form": "prism",
+        "base": 6,
+        "height": 3.4499999999999993,
+        "thickness": 0.18
+      },
+      "position": [
+        -5.5,
+        5.725,
+        0
+      ],
+      "rotX": 0,
+      "aabb": {
+        "min": [
+          -5.59,
+          4,
+          -3
+        ],
+        "max": [
+          -5.41,
+          7.449999999999999,
+          3
+        ]
+      },
+      "materialKey": "wall"
+    }
+  ]
+}
